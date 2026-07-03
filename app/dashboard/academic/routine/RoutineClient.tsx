@@ -4,15 +4,7 @@ import { useState } from "react";
 import { CalendarDays, Clock, MapPin, User, BookOpen, Palette, LayoutTemplate } from "lucide-react";
 import PrintButton from "@/app/components/PrintButton";
 
-export default function RoutineClient({ 
-  routines, 
-  routineType, 
-  className 
-}: { 
-  routines: any[], 
-  routineType: string,
-  className?: string 
-}) {
+export default function RoutineClient({ routines, routineType, className, madrasaInfo }: { routines: any[], routineType: string, className?: string, madrasaInfo?: {name: string, address: string, phone: string} }) {
   const [template, setTemplate] = useState("grid");
   const [themeColor, setThemeColor] = useState("indigo");
 
@@ -48,7 +40,9 @@ export default function RoutineClient({
     <div className="bg-white rounded-xl border shadow-sm p-6 print:border-none print:shadow-none print:p-0">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 border-b pb-4 print:hidden gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">
+          <h1 className="text-xl font-bold text-slate-800 uppercase tracking-wider">{madrasaInfo?.name || "Qawmi Madrasa"}</h1>
+          <p className="text-sm text-slate-500 mb-2">{madrasaInfo?.address || ""}</p>
+          <h2 className="text-lg font-bold text-slate-700">
             {routineType === 'Class' ? 'ক্লাস রুটিন' : 'পরীক্ষার রুটিন'}
           </h2>
           {className && (
@@ -93,7 +87,9 @@ export default function RoutineClient({
 
       <div id="printable-routine-content" className="print:m-0 print:p-0">
         <div className="hidden print:block mb-6 border-b pb-4">
-          <h2 className={`text-2xl font-bold ${currentTheme.text} text-center`}>
+          <h1 className={`text-3xl font-bold ${currentTheme.text} text-center uppercase tracking-wider`}>{madrasaInfo?.name || "Qawmi Madrasa"}</h1>
+          <p className="text-center text-slate-500 mb-2">{madrasaInfo?.address || "Address"}</p>
+          <h2 className={`text-xl font-bold text-slate-800 text-center`}>
             {routineType === 'Class' ? 'ক্লাস রুটিন' : 'পরীক্ষার রুটিন'}
           </h2>
           {className && (

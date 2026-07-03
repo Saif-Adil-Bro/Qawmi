@@ -3,14 +3,17 @@ import { CalendarDays, Clock, MapPin, User, BookOpen } from "lucide-react";
 import PrintButton from "@/app/components/PrintButton";
 import Link from "next/link";
 import RoutineClient from "./RoutineClient";
+import { getMadrasaInfo } from "@/lib/getMadrasaInfo";
 
 export default async function RoutinePage({
   searchParams,
 }: {
-  searchParams: { class_id?: string; type?: string };
+  searchParams: Promise<{ class_id?: string; type?: string }>;
 }) {
-  const params = searchParams;
+  const params = await searchParams;
   const supabase = await createClient();
+  const madrasaInfo = await getMadrasaInfo();
+
   const { data: classes } = await supabase.from("classes").select("id, name");
 
   const classId = params?.class_id || (classes?.[0]?.id || "");
@@ -82,7 +85,7 @@ export default async function RoutinePage({
         </form>
       </div>
 
-            <RoutineClient routines={routines} routineType={routineType} className={classes?.find(c => c.id === classId)?.name} />
+            <RoutineClient routines={routines} routineType={routineType} className={classes?.find(c => c.id === classId)?.name} madrasaInfo={madrasaInfo} />
     </div>
   );
 }

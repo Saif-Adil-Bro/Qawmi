@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import ReportingCharts from "./components/ReportingCharts";
+
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -32,6 +34,9 @@ export default async function DashboardPage() {
   let todayAbsent = 0;
   let totalIncome = 0;
   let totalExpense = 0;
+  let incomeExpenseData: any[] = [];
+  let attendanceData: any[] = [];
+  let examPassRateData: any[] = [];
 
   try {
     const response = await withTimeout<any>(
@@ -55,20 +60,27 @@ export default async function DashboardPage() {
         { count: cCount },
         { count: presentCount },
         { count: absentCount },
+
         { data: feesData },
         { data: donationsData },
         { data: expensesData },
-        { data: bazarData }
+        { data: bazarData },
+        { data: attendanceAllData },
+        { data: examResultsData }
+
       ] = await Promise.all([
         supabase.from("students").select("*", { count: "exact", head: true }).eq("madrasa_id", profile.madrasa_id),
         supabase.from("teachers").select("*", { count: "exact", head: true }).eq("madrasa_id", profile.madrasa_id),
         supabase.from("classes").select("*", { count: "exact", head: true }).eq("madrasa_id", profile.madrasa_id),
         supabase.from("attendance").select("*", { count: "exact", head: true }).eq("madrasa_id", profile.madrasa_id).eq("date", today).eq("status", "Present"),
         supabase.from("attendance").select("*", { count: "exact", head: true }).eq("madrasa_id", profile.madrasa_id).eq("date", today).eq("status", "Absent"),
-        supabase.from("fees").select("amount").eq("madrasa_id", profile.madrasa_id),
-        supabase.from("donations").select("amount").eq("madrasa_id", profile.madrasa_id),
-        supabase.from("expenses").select("amount").eq("madrasa_id", profile.madrasa_id),
-        supabase.from("bazar_expenses").select("amount").eq("madrasa_id", profile.madrasa_id)
+
+        supabase.from("fees").select("amount, payment_date").eq("madrasa_id", profile.madrasa_id),
+        supabase.from("donations").select("amount, donation_date").eq("madrasa_id", profile.madrasa_id),
+        supabase.from("expenses").select("amount, expense_date").eq("madrasa_id", profile.madrasa_id),
+        supabase.from("bazar_expenses").select("amount, expense_date").eq("madrasa_id", profile.madrasa_id),
+        supabase.from("attendance").select("status").eq("madrasa_id", profile.madrasa_id).gte("date", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]),
+        supabase.from("exam_results").select("marks_obtained, total_marks, exams(name)").eq("madrasa_id", profile.madrasa_id)
       ]);
 
       studentsCount = sCount || 0;
@@ -77,6 +89,7 @@ export default async function DashboardPage() {
       todayPresent = presentCount || 0;
       todayAbsent = absentCount || 0;
 
+
       const feesSum = (feesData || []).reduce((sum: number, item: any) => sum + Number(item.amount || 0), 0);
       const donationsSum = (donationsData || []).reduce((sum: number, item: any) => sum + Number(item.amount || 0), 0);
       totalIncome = feesSum + donationsSum;
@@ -84,6 +97,60 @@ export default async function DashboardPage() {
       const expensesSum = (expensesData || []).reduce((sum: number, item: any) => sum + Number(item.amount || 0), 0);
       const bazarSum = (bazarData || []).reduce((sum: number, item: any) => sum + Number(item.amount || 0), 0);
       totalExpense = expensesSum + bazarSum;
+
+      // Process Monthly Income/Expense
+      const monthlyData: Record<string, { income: number; expense: number }> = {};
+      const addMonthly = (dateStr: string, amount: number, type: 'income' | 'expense') => {
+        if (!dateStr) return;
+        const month = dateStr.substring(0, 7); // YYYY-MM
+        if (!monthlyData[month]) monthlyData[month] = { income: 0, expense: 0 };
+        monthlyData[month][type] += Number(amount);
+      };
+
+      (feesData || []).forEach((f: any) => addMonthly(f.payment_date, f.amount, 'income'));
+      (donationsData || []).forEach((d: any) => addMonthly(d.donation_date, d.amount, 'income'));
+      (expensesData || []).forEach((e: any) => addMonthly(e.expense_date, e.amount, 'expense'));
+      (bazarData || []).forEach((b: any) => addMonthly(b.expense_date, b.amount, 'expense'));
+
+      // Process Attendance Rate
+      let presentTotal = 0;
+      let absentTotal = 0;
+      let leaveTotal = 0;
+      (attendanceAllData || []).forEach((a: any) => {
+        if (a.status === 'Present') presentTotal++;
+        else if (a.status === 'Absent') absentTotal++;
+        else if (a.status === 'Leave') leaveTotal++;
+      });
+
+      // Process Exam Pass Rate
+      const examStats: Record<string, { total: number; passed: number }> = {};
+      (examResultsData || []).forEach((r: any) => {
+        const examName = r.exams?.name || 'অজানা পরীক্ষা';
+        if (!examStats[examName]) examStats[examName] = { total: 0, passed: 0 };
+        examStats[examName].total++;
+        const percent = (Number(r.marks_obtained) / Number(r.total_marks)) * 100;
+        if (percent >= 33) {
+          examStats[examName].passed++;
+        }
+      });
+      
+      incomeExpenseData = Object.keys(monthlyData).sort().map(month => ({
+        month,
+        income: monthlyData[month].income,
+        expense: monthlyData[month].expense
+      })).slice(-6); // last 6 months
+
+      attendanceData = [
+        { name: 'উপস্থিত', value: presentTotal },
+        { name: 'অনুপস্থিত', value: absentTotal },
+        { name: 'ছুটি', value: leaveTotal }
+      ].filter(d => d.value > 0);
+
+      examPassRateData = Object.keys(examStats).map(exam => ({
+        exam,
+        passRate: (examStats[exam].passed / examStats[exam].total) * 100
+      }));
+
     }
   } catch (err: any) {
     error = { message: err?.message };
@@ -133,7 +200,15 @@ export default async function DashboardPage() {
           <h3 className="text-slate-500 text-sm font-medium">মোট ব্যয়</h3>
           <p className="text-3xl font-bold text-rose-600 mt-2">৳ {totalExpense.toLocaleString('en-IN')}</p>
         </div>
+
       </div>
+
+      <ReportingCharts 
+        incomeExpenseData={incomeExpenseData} 
+        attendanceData={attendanceData} 
+        examPassRateData={examPassRateData} 
+      />
     </div>
   );
+
 }

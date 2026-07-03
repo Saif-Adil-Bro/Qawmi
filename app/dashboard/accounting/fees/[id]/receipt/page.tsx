@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getFeeWithReceiptNo } from "@/app/actions/accounting";
+import { getMadrasaInfo } from "@/lib/getMadrasaInfo";
 import { notFound } from "next/navigation";
 import ReceiptClient from "./ReceiptClient";
 
@@ -12,5 +13,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
     return notFound();
   }
 
-  return <ReceiptClient fee={fee} />;
+  const madrasaInfo = await getMadrasaInfo();
+
+  return <ReceiptClient fee={fee} madrasaInfo={madrasaInfo} />;
 }

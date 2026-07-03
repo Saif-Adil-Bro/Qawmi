@@ -4,13 +4,7 @@ import { useState } from "react";
 import { Award, Palette, LayoutTemplate } from "lucide-react";
 import PrintButton from "@/app/components/PrintButton";
 
-export default function CertificateClient({ 
-  selectedStudent, 
-  certificateType 
-}: { 
-  selectedStudent: any, 
-  certificateType: string 
-}) {
+export default function CertificateClient({ selectedStudent, certificateType, madrasaInfo }: { selectedStudent: any, certificateType: string, madrasaInfo?: {name: string, address: string, phone: string} }) {
   const [template, setTemplate] = useState("ornate");
   const [themeColor, setThemeColor] = useState("slate");
 
@@ -75,7 +69,9 @@ export default function CertificateClient({
                <Award className="w-32 h-32" />
             </div>
             
-            <h1 className={`text-4xl font-black ${currentTheme.text} mb-2 tracking-widest`}>বিসমিল্লাহির রাহমানির রাহিম</h1>
+            <h1 className={`text-4xl font-black ${currentTheme.text} mb-2 tracking-widest`}>{madrasaInfo?.name || "Qawmi Madrasa"}</h1>
+            <p className="text-xl text-slate-600 mb-2">{madrasaInfo?.address || "Address"}</p>
+            <h1 className={`text-xl font-bold ${currentTheme.text} mb-2 tracking-widest`}>বিসমিল্লাহির রাহমানির রাহিম</h1>
             <h2 className={`text-3xl font-bold ${currentTheme.text} mb-8 mt-6`}>
               {certificateType === "Hifz" ? "হিফজুল কুরআন সমাপ্তি সনদ" :
                 certificateType === "Dawra" ? "দাওরায়ে হাদিস সমাপ্তি সনদ" : "প্রশংসাপত্র"}
@@ -112,7 +108,9 @@ export default function CertificateClient({
 
         {template === 'standard' && (
           <div className={`border-8 solid ${currentTheme.main} p-12 text-center relative w-[10in] h-[7.5in] bg-slate-50 flex flex-col justify-center`}>
-            <h1 className={`text-3xl font-bold text-slate-800 mb-2`}>বিসমিল্লাহির রাহমানির রাহিম</h1>
+            <h1 className={`text-4xl font-black ${currentTheme.text} mb-2 tracking-widest uppercase`}>{madrasaInfo?.name || "Qawmi Madrasa"}</h1>
+            <p className="text-xl text-slate-600 mb-4">{madrasaInfo?.address || "Address"}</p>
+            <h1 className={`text-2xl font-bold text-slate-800 mb-2`}>বিসমিল্লাহির রাহমানির রাহিম</h1>
             <div className={`w-32 h-1 ${currentTheme.main} bg-current mx-auto my-4`}></div>
             <h2 className={`text-4xl font-black ${currentTheme.text} mb-12 uppercase tracking-wide`}>
               {certificateType === "Hifz" ? "হিফজুল কুরআন সমাপ্তি সনদ" :

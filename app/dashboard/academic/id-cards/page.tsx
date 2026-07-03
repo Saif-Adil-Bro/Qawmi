@@ -1,14 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
 import PrintButton from "@/app/components/PrintButton";
 import IdCardClient from "./IdCardClient";
+import { getMadrasaInfo } from "@/lib/getMadrasaInfo";
 
 export default async function IdCardsPage({
   searchParams,
 }: {
-  searchParams: { class_id?: string; user_type?: string };
+  searchParams: Promise<{ class_id?: string; user_type?: string }>;
 }) {
-  const params = searchParams;
+  const params = await searchParams;
   const supabase = await createClient();
+  const madrasaInfo = await getMadrasaInfo();
+
   const { data: classes } = await supabase.from("classes").select("id, name");
 
   const classId = params?.class_id;
@@ -65,7 +68,7 @@ export default async function IdCardsPage({
       </div>
 
       
-      <IdCardClient users={users} userType={userType} />
+      <IdCardClient users={users} userType={userType} madrasaInfo={madrasaInfo} />
     </div>
   );
 }

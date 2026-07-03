@@ -3,7 +3,7 @@
 import { Printer, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-export default function ReceiptClient({ fee }: { fee: any }) {
+export default function ReceiptClient({ fee, madrasaInfo }: { fee: any, madrasaInfo?: any }) {
   const printReceipt = () => {
     window.print();
   };
@@ -35,9 +35,14 @@ export default function ReceiptClient({ fee }: { fee: any }) {
       </div>
 
       <div className="bg-white p-8 md:p-12 rounded-xl shadow-sm border border-slate-200 max-w-3xl mx-auto" id="receipt-area">
-        <div className="text-center mb-8 pb-8 border-b border-slate-200">
-          <h2 className="text-3xl font-bold text-slate-800 mb-2">মানি রিসিট</h2>
-          <p className="text-slate-500">রিসিট নং: <span className="font-mono text-slate-700 font-medium">{fee.receipt_no}</span></p>
+        <div className="text-center mb-8 pb-8 border-b border-slate-200 flex flex-col items-center">
+          {madrasaInfo?.logo_url && (
+            <img src={madrasaInfo.logo_url} alt="Logo" className="w-20 h-20 object-contain mb-3" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+          )}
+          {madrasaInfo?.name && <h1 className="text-2xl font-bold text-slate-800">{madrasaInfo.name}</h1>}
+          {madrasaInfo?.address && <p className="text-slate-600 mb-4">{madrasaInfo.address}</p>}
+          <h2 className="text-xl font-bold text-slate-800 mt-2 bg-slate-100 inline-block px-4 py-1.5 rounded-full border border-slate-200">মানি রিসিট</h2>
+          <p className="text-slate-500 mt-3">রিসিট নং: <span className="font-mono text-slate-700 font-medium">{fee.receipt_no}</span></p>
         </div>
         
         <div className="grid grid-cols-2 gap-y-6 gap-x-12 text-slate-700">

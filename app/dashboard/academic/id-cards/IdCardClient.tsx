@@ -4,7 +4,7 @@ import { useState } from "react";
 import PrintButton from "@/app/components/PrintButton";
 import { IdCard, Palette, LayoutTemplate } from "lucide-react";
 
-export default function IdCardClient({ users, userType }: { users: any[], userType: string }) {
+export default function IdCardClient({ users, userType, madrasaInfo }: { users: any[], userType: string, madrasaInfo?: {name: string, address: string, phone: string} }) {
   const [template, setTemplate] = useState("modern");
   const [themeColor, setThemeColor] = useState("blue");
 
@@ -70,8 +70,8 @@ export default function IdCardClient({ users, userType }: { users: any[], userTy
             {template === 'modern' && (
               <div className="w-full h-full border border-slate-300 rounded-xl overflow-hidden shadow-sm relative bg-white flex flex-col">
                 <div className={`h-20 ${currentTheme.bg} text-white flex flex-col items-center justify-center p-2`}>
-                  <h3 className="font-bold text-sm tracking-wider">QawmiERP</h3>
-                  <p className="text-[10px] opacity-80">মাদরাসা ম্যানেজমেন্ট</p>
+                  <h3 className="font-bold text-sm tracking-wider">{madrasaInfo?.name || "QawmiERP"}</h3>
+                  <p className="text-[10px] opacity-80">{madrasaInfo?.address || "মাদরাসা ম্যানেজমেন্ট"}</p>
                 </div>
                 
                 <div className="flex-1 flex flex-col items-center px-4 pt-10 relative">
@@ -132,8 +132,8 @@ export default function IdCardClient({ users, userType }: { users: any[], userTy
                      <IdCard className={`w-4 h-4 ${currentTheme.text}`} />
                    </div>
                    <div className="text-right">
-                     <h3 className={`font-bold text-xs ${currentTheme.text} uppercase`}>QawmiERP</h3>
-                     <p className="text-[8px] text-slate-500 uppercase">Identity Card</p>
+                     <h3 className={`font-bold text-xs ${currentTheme.text} uppercase`}>{madrasaInfo?.name || "QawmiERP"}</h3>
+                     <p className="text-[8px] text-slate-500 uppercase">{madrasaInfo?.address || "Identity Card"}</p>
                    </div>
                 </div>
                 
@@ -185,8 +185,8 @@ export default function IdCardClient({ users, userType }: { users: any[], userTy
 
             {template === 'minimal' && (
               <div className="w-full h-full border border-slate-200 rounded-sm overflow-hidden relative bg-white flex flex-col p-4">
-                <h3 className={`font-black text-sm text-center tracking-widest uppercase ${currentTheme.text}`}>QawmiERP</h3>
-                <div className="w-full border-b-2 border-slate-100 my-2"></div>
+                <h3 className={`font-black text-sm text-center tracking-widest uppercase ${currentTheme.text}`}>{madrasaInfo?.name || "QawmiERP"}</h3>
+                <p className="text-[8px] text-center text-slate-500">{madrasaInfo?.address}</p><div className="w-full border-b-2 border-slate-100 my-2"></div>
                 
                 <div className="flex-1 flex flex-col items-center justify-center">
                   <div className="bg-slate-100 w-16 h-16 rounded-full mb-3 flex items-center justify-center">

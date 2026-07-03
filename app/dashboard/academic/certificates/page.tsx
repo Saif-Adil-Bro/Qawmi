@@ -2,14 +2,17 @@ import { createClient } from "@/lib/supabase/server";
 import { Award } from "lucide-react";
 import PrintButton from "@/app/components/PrintButton";
 import CertificateClient from "./CertificateClient";
+import { getMadrasaInfo } from "@/lib/getMadrasaInfo";
 
 export default async function CertificatesPage({
   searchParams,
 }: {
-  searchParams: { student_id?: string; type?: string };
+  searchParams: Promise<{ student_id?: string; type?: string }>;
 }) {
-  const params = searchParams;
+  const params = await searchParams;
   const supabase = await createClient();
+  const madrasaInfo = await getMadrasaInfo();
+
   const { data: students } = await supabase.from("students").select("id, first_name, last_name, roll_number").order("first_name");
 
   const studentId = params?.student_id;
@@ -60,7 +63,7 @@ export default async function CertificatesPage({
       </div>
 
       {selectedStudent && (
-        <CertificateClient selectedStudent={selectedStudent} certificateType={certificateType} />
+        <CertificateClient selectedStudent={selectedStudent} certificateType={certificateType} madrasaInfo={madrasaInfo} />
       )}
     </div>
   );
