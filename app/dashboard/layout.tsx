@@ -5,9 +5,9 @@ import { LayoutDashboard, Users, BookOpen, LogOut, Settings, CheckSquare, Wallet
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-slate-50 print:bg-white print:h-auto">
       {/* Sidebar */}
-      <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col overflow-y-auto">
+      <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col overflow-y-auto print:hidden">
         <div className="p-6 border-b border-slate-800 shrink-0">
           <h2 className="text-2xl font-bold text-white tracking-tight">QawmiERP</h2>
           <p className="text-xs text-slate-500 mt-1">মাদ্রাসা ম্যানেজমেন্ট</p>
@@ -113,9 +113,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden print:overflow-visible">
         {/* Header */}
-        <header className="h-16 bg-white border-b flex items-center justify-between px-8">
+        <header className="h-16 bg-white border-b flex items-center justify-between px-8 print:hidden">
           <h1 className="text-lg font-medium text-slate-800">এডমিন পোর্টাল</h1>
           <div className="flex items-center space-x-4">
             <div className="w-9 h-9 bg-slate-100 rounded-full flex items-center justify-center text-slate-700 font-bold border">
@@ -125,7 +125,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-8">
+        <main className="flex-1 overflow-auto p-8 print:p-0 print:overflow-visible">
           {children}
         </main>
       </div>
