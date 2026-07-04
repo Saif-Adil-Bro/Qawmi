@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getExams } from "@/app/actions/exams";
-import { Plus, ArrowLeft, PenTool, FileText } from "lucide-react";
+import { Plus, ArrowLeft, PenTool, FileText, Printer, IdCard } from "lucide-react";
 import { format } from "date-fns";
 
 export default async function ExamsPage() {
@@ -65,9 +65,23 @@ export default async function ExamsPage() {
                       <Link
                         href={`/dashboard/exams/${exam.id}/results`}
                         className="inline-flex items-center justify-center p-2 text-emerald-600 hover:bg-emerald-50 rounded-md transition border border-transparent hover:border-emerald-100"
-                        title="ফলাফল / মার্কশিট"
+                        title="ফলাফল তালিকা (Tabulation)"
                       >
                         <FileText className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={`/dashboard/exams/${exam.id}/report-cards`}
+                        className="inline-flex items-center justify-center p-2 text-slate-600 hover:bg-slate-100 rounded-md transition border border-transparent hover:border-slate-200"
+                        title="স্বতন্ত্র মার্কশিট (Report Cards)"
+                      >
+                        <Printer className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={`/dashboard/exams/${exam.id}/admit-cards`}
+                        className="inline-flex items-center justify-center p-2 text-blue-600 hover:bg-blue-50 rounded-md transition border border-transparent hover:border-blue-200"
+                        title="প্রবেশপত্র (Admit Cards)"
+                      >
+                        <IdCard className="w-4 h-4" />
                       </Link>
                     </td>
                   </tr>
