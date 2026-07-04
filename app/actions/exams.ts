@@ -87,7 +87,7 @@ export async function deleteExam(examId: string) {
   return { success: true };
 }
 
-export async function getStudentsByClass(className: string) {
+export async function getStudentsByClass(classId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
@@ -97,20 +97,20 @@ export async function getStudentsByClass(className: string) {
 
   const { data, error } = await supabase
     .from("students")
-    .select("id, first_name, last_name, roll_number, class_name")
+    .select("id, first_name, last_name, roll_number, class_id")
     .eq("madrasa_id", finalMadrasaId)
-    .eq("class_name", className)
+    .eq("class_id", classId)
     .order("roll_number", { ascending: true });
 
   if (error) return [];
   return data;
 }
 
-export async function getExamResults(examId: string, className: string, subjectName: string) {
+export async function getExamResults(examId: string, classId: string, subjectName: string) {
   const supabase = await createClient();
   
   // Get all students of the class
-  const students = await getStudentsByClass(className);
+  const students = await getStudentsByClass(classId);
   if (!students.length) return [];
 
   // Get marks for these students
@@ -163,7 +163,7 @@ export async function saveExamMarks(examId: string, subjectName: string, marksDa
   return { success: true };
 }
 
-export async function getStudentReportCard(examId: string, class_name?: string) {
+export async function getStudentReportCard(examId: string, classId?: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
@@ -173,11 +173,11 @@ export async function getStudentReportCard(examId: string, class_name?: string) 
   
   let studentsQuery = supabase
     .from("students")
-    .select("id, first_name, last_name, roll_number, class_name")
+    .select("id, first_name, last_name, roll_number, class_id, classes(name)")
     .eq("madrasa_id", finalMadrasaId);
     
-  if (class_name) {
-    studentsQuery = studentsQuery.eq("class_name", class_name);
+  if (classId) {
+    studentsQuery = studentsQuery.eq("class_id", classId);
   }
   
   const { data: students, error: studentsError } = await studentsQuery.order('roll_number');
@@ -201,6 +201,7 @@ export async function getStudentReportCard(examId: string, class_name?: string) 
     
     return {
       ...student,
+      class_name: Array.isArray(student.classes) ? student.classes[0]?.name : (student.classes as any)?.name,
       marks: studentMarks,
       totalObtained,
       totalMax,

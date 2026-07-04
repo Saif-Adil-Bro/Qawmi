@@ -1,24 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getExamResults, saveExamMarks } from "@/app/actions/exams";
+import { getClassSubjects } from "@/app/actions/class_subjects";
 
-export default function MarksEntryClient({ examId, classes }: { examId: string, classes: { class_name: string }[] }) {
-  const [className, setClassName] = useState("");
+export default function MarksEntryClient({ examId, classes }: { examId: string, classes: { id: string, name: string }[] }) {
+  const [classId, setClassId] = useState("");
   const [subjectName, setSubjectName] = useState("");
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [subjects, setSubjects] = useState<{ id: string, name: string }[]>([]);
+
+  useEffect(() => {
+    if (classId) {
+      getClassSubjects(classId).then((data) => {
+        setSubjects(data.map((item: any) => ({ id: item.subjects?.id, name: item.subjects?.name })));
+        setSubjectName("");
+        setStudents([]);
+      });
+    } else {
+      setSubjects([]);
+      setSubjectName("");
+      setStudents([]);
+    }
+  }, [classId]);
 
   const loadStudents = async () => {
-    if (!className || !subjectName) {
+    if (!classId || !subjectName) {
       alert("ক্লাস এবং বিষয়ের নাম নির্বাচন করুন।");
       return;
     }
     setLoading(true);
     setMessage(null);
-    const data = await getExamResults(examId, className, subjectName);
+    const data = await getExamResults(examId, classId, subjectName);
     setStudents(data);
     setLoading(false);
   };
@@ -66,19 +82,7 @@ export default function MarksEntryClient({ examId, classes }: { examId: string, 
     setSaving(false);
   };
 
-  // Example static subjects for simplicity. In a real app, this might come from DB per class.
-  const subjects = [
-    "কুরআন মজিদ",
-    "তাজভীদ",
-    "বাংলা",
-    "ইংরেজি",
-    "গণিত",
-    "আরবি",
-    "উর্দু",
-    "ফার্সি",
-    "আকাইদ",
-    "ফিকহ"
-  ];
+  const selectedClassName = classes.find(c => c.id === classId)?.name || '';
 
   return (
     <div className="space-y-6">
@@ -92,13 +96,13 @@ export default function MarksEntryClient({ examId, classes }: { examId: string, 
         <div className="w-full sm:w-1/3">
           <label className="block text-sm font-medium text-slate-700 mb-1">ক্লাস</label>
           <select 
-            value={className}
-            onChange={(e) => { setClassName(e.target.value); setStudents([]); }}
+            value={classId}
+            onChange={(e) => setClassId(e.target.value)}
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-slate-900 transition bg-white"
           >
             <option value="">নির্বাচন করুন</option>
             {classes.map(c => (
-              <option key={c.class_name} value={c.class_name}>{c.class_name}</option>
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
         </div>
@@ -109,10 +113,11 @@ export default function MarksEntryClient({ examId, classes }: { examId: string, 
             value={subjectName}
             onChange={(e) => { setSubjectName(e.target.value); setStudents([]); }}
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-slate-900 transition bg-white"
+            disabled={!classId}
           >
             <option value="">নির্বাচন করুন</option>
             {subjects.map(s => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s.id} value={s.name}>{s.name}</option>
             ))}
           </select>
         </div>
@@ -120,7 +125,7 @@ export default function MarksEntryClient({ examId, classes }: { examId: string, 
         <div className="w-full sm:w-1/3">
           <button 
             onClick={loadStudents}
-            disabled={!className || !subjectName || loading}
+            disabled={!classId || !subjectName || loading}
             className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 transition disabled:opacity-50 font-medium shadow-sm"
           >
             {loading ? "খুঁজছি..." : "শিক্ষার্থী খুঁজুন"}
@@ -131,7 +136,7 @@ export default function MarksEntryClient({ examId, classes }: { examId: string, 
       {students.length > 0 && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="font-semibold text-slate-800">শিক্ষার্থীদের তালিকা ({className} - {subjectName})</h3>
+            <h3 className="font-semibold text-slate-800">শিক্ষার্থীদের তালিকা ({selectedClassName} - {subjectName})</h3>
             <button 
               onClick={handleSave}
               disabled={saving}

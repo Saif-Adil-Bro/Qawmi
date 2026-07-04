@@ -11,17 +11,17 @@ export default function ExamResultsClient({
   examYear 
 }: { 
   examId: string, 
-  classes: { class_name: string }[],
+  classes: { id: string, name: string }[],
   examTitle: string,
   examYear: string
 }) {
-  const [className, setClassName] = useState("");
+  const [classId, setClassId] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   const loadResults = async () => {
     setLoading(true);
-    const data = await getStudentReportCard(examId, className || undefined);
+    const data = await getStudentReportCard(examId, classId || undefined);
     // Sort by percentage descending
     const sortedData = data.sort((a, b) => Number(b.percentage) - Number(a.percentage));
     setResults(sortedData);
@@ -31,6 +31,8 @@ export default function ExamResultsClient({
   const handlePrint = () => {
     window.print();
   };
+  
+  const selectedClassName = classes.find(c => c.id === classId)?.name || '';
 
   return (
     <div className="space-y-6">
@@ -38,13 +40,13 @@ export default function ExamResultsClient({
         <div className="w-full sm:w-1/3">
           <label className="block text-sm font-medium text-slate-700 mb-1">ক্লাস (ঐচ্ছিক)</label>
           <select 
-            value={className}
-            onChange={(e) => setClassName(e.target.value)}
+            value={classId}
+            onChange={(e) => setClassId(e.target.value)}
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-slate-900 transition bg-white"
           >
             <option value="">সব ক্লাস</option>
             {classes.map(c => (
-              <option key={c.class_name} value={c.class_name}>{c.class_name}</option>
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
         </div>
@@ -72,7 +74,7 @@ export default function ExamResultsClient({
       <div className="hidden print:block mb-8 text-center border-b pb-4 border-slate-800">
         <h2 className="text-2xl font-bold text-slate-900">{examTitle} - {examYear}</h2>
         <p className="text-slate-600 mt-1 text-lg">
-          ফলাফল তালিকা {className ? `(${className})` : ''}
+          ফলাফল তালিকা {selectedClassName ? `(${selectedClassName})` : ''}
         </p>
       </div>
 
@@ -84,7 +86,7 @@ export default function ExamResultsClient({
                 <th className="px-4 py-3 print:border print:border-slate-300">মেধা স্থান</th>
                 <th className="px-4 py-3 print:border print:border-slate-300">রোল</th>
                 <th className="px-4 py-3 print:border print:border-slate-300">নাম</th>
-                {!className && <th className="px-4 py-3 print:border print:border-slate-300">ক্লাস</th>}
+                {!classId && <th className="px-4 py-3 print:border print:border-slate-300">ক্লাস</th>}
                 <th className="px-4 py-3 text-center print:border print:border-slate-300">মোট নম্বর</th>
                 <th className="px-4 py-3 text-center print:border print:border-slate-300">প্রাপ্ত নম্বর</th>
                 <th className="px-4 py-3 text-center print:border print:border-slate-300">শতকরা</th>
@@ -99,7 +101,7 @@ export default function ExamResultsClient({
                   <td className="px-4 py-3 font-medium text-slate-900 print:border print:border-slate-300">
                     {student.first_name} {student.last_name}
                   </td>
-                  {!className && <td className="px-4 py-3 print:border print:border-slate-300">{student.class_name}</td>}
+                  {!classId && <td className="px-4 py-3 print:border print:border-slate-300">{student.class_name}</td>}
                   <td className="px-4 py-3 text-center print:border print:border-slate-300">{student.totalMax}</td>
                   <td className="px-4 py-3 text-center font-semibold text-slate-800 print:border print:border-slate-300">{student.totalObtained}</td>
                   <td className="px-4 py-3 text-center print:border print:border-slate-300">{student.percentage}%</td>
@@ -121,7 +123,7 @@ export default function ExamResultsClient({
         </div>
       )}
       
-      {!loading && results.length === 0 && className !== "" && (
+      {!loading && results.length === 0 && classId !== "" && (
         <div className="text-center py-12 text-slate-500">
           কোনো ফলাফল পাওয়া যায়নি।
         </div>
