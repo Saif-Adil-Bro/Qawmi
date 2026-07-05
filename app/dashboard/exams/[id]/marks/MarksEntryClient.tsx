@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getExamResults, saveExamMarks } from "@/app/actions/exams";
+import { getExamResults, saveExamMarks, getExamSubjects } from "@/app/actions/exams";
 import { getClassSubjects } from "@/app/actions/class_subjects";
 
 export default function MarksEntryClient({ examId, classes }: { examId: string, classes: { id: string, name: string }[] }) {
@@ -13,19 +13,34 @@ export default function MarksEntryClient({ examId, classes }: { examId: string, 
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [subjects, setSubjects] = useState<{ id: string, name: string }[]>([]);
 
+  const [examSubjectsDetails, setExamSubjectsDetails] = useState<any[]>([]);
+
   useEffect(() => {
     if (classId) {
-      getClassSubjects(classId).then((data) => {
-        setSubjects(data.map((item: any) => ({ id: item.subjects?.id, name: item.subjects?.name })));
+      // Fetch both standard class subjects and exam-specific setup
+      Promise.all([
+        getClassSubjects(classId),
+        getExamSubjects(examId, classId)
+      ]).then(([classSubjData, examSubjData]) => {
+        let finalSubjects = [];
+        if (examSubjData && examSubjData.length > 0) {
+          finalSubjects = examSubjData.map((s: any) => ({ id: s.id, name: s.subject_name }));
+          setExamSubjectsDetails(examSubjData);
+        } else {
+          finalSubjects = classSubjData.map((item: any) => ({ id: item.subjects?.id, name: item.subjects?.name }));
+          setExamSubjectsDetails([]);
+        }
+        setSubjects(finalSubjects);
         setSubjectName("");
         setStudents([]);
       });
     } else {
       setSubjects([]);
+      setExamSubjectsDetails([]);
       setSubjectName("");
       setStudents([]);
     }
-  }, [classId]);
+  }, [classId, examId]);
 
   const loadStudents = async () => {
     if (!classId || !subjectName) {
@@ -35,7 +50,17 @@ export default function MarksEntryClient({ examId, classes }: { examId: string, 
     setLoading(true);
     setMessage(null);
     const data = await getExamResults(examId, classId, subjectName);
-    setStudents(data);
+    
+    // Auto-fill total marks if set in exam setup
+    const setupInfo = examSubjectsDetails.find(s => s.subject_name === subjectName);
+    const configuredTotal = setupInfo ? setupInfo.total_marks : 100;
+    
+    const studentsWithMarks = data.map((student: any) => ({
+      ...student,
+      total_marks: student.total_marks || configuredTotal
+    }));
+    
+    setStudents(studentsWithMarks);
     setLoading(false);
   };
 
