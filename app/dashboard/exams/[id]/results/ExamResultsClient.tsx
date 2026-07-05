@@ -34,8 +34,23 @@ export default function ExamResultsClient({
   
   const selectedClassName = classes.find(c => c.id === classId)?.name || '';
 
+  // Extract all unique subjects
+  const allSubjects = new Set<string>();
+  results.forEach(student => {
+    student.marks?.forEach((m: any) => {
+      if (m.subject_name) allSubjects.add(m.subject_name);
+    });
+  });
+  const subjectList = Array.from(allSubjects);
+
   return (
     <div className="space-y-6">
+      <style dangerouslySetInnerHTML={{__html: `
+        @media print {
+          @page { size: landscape; margin: 1cm; }
+          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+      `}} />
       <div className="flex flex-col sm:flex-row gap-4 items-end bg-slate-50 p-4 rounded-lg border border-slate-100 print:hidden">
         <div className="w-full sm:w-1/3">
           <label className="block text-sm font-medium text-slate-700 mb-1">ক্লাস (ঐচ্ছিক)</label>
@@ -87,10 +102,13 @@ export default function ExamResultsClient({
                 <th className="px-4 py-3 print:border print:border-slate-300">রোল</th>
                 <th className="px-4 py-3 print:border print:border-slate-300">নাম</th>
                 {!classId && <th className="px-4 py-3 print:border print:border-slate-300">ক্লাস</th>}
-                <th className="px-4 py-3 text-center print:border print:border-slate-300">মোট নম্বর</th>
-                <th className="px-4 py-3 text-center print:border print:border-slate-300">প্রাপ্ত নম্বর</th>
+                {subjectList.map(sub => (
+                  <th key={sub} className="px-4 py-3 text-center print:border print:border-slate-300 whitespace-nowrap">{sub}</th>
+                ))}
+                <th className="px-4 py-3 text-center print:border print:border-slate-300">মোট প্রাপ্ত</th>
                 <th className="px-4 py-3 text-center print:border print:border-slate-300">শতকরা</th>
-                <th className="px-4 py-3 text-center print:border print:border-slate-300">বিভাগ (Grade)</th>
+                <th className="px-4 py-3 text-center print:border print:border-slate-300">বিভাগ</th>
+                <th className="px-4 py-3 text-center print:border print:border-slate-300">জিপিএ (GPA)</th>
               </tr>
             </thead>
             <tbody className="divide-y text-slate-600">
@@ -98,12 +116,19 @@ export default function ExamResultsClient({
                 <tr key={student.id} className="hover:bg-slate-50/50 transition print:hover:bg-white">
                   <td className="px-4 py-3 text-center font-bold text-slate-900 print:border print:border-slate-300">{index + 1}</td>
                   <td className="px-4 py-3 print:border print:border-slate-300">{student.roll_number || '-'}</td>
-                  <td className="px-4 py-3 font-medium text-slate-900 print:border print:border-slate-300">
+                  <td className="px-4 py-3 font-medium text-slate-900 print:border print:border-slate-300 whitespace-nowrap">
                     {student.first_name} {student.last_name}
                   </td>
                   {!classId && <td className="px-4 py-3 print:border print:border-slate-300">{student.class_name}</td>}
-                  <td className="px-4 py-3 text-center print:border print:border-slate-300">{student.totalMax}</td>
-                  <td className="px-4 py-3 text-center font-semibold text-slate-800 print:border print:border-slate-300">{student.totalObtained}</td>
+                  {subjectList.map(sub => {
+                    const markObj = student.marks?.find((m: any) => m.subject_name === sub);
+                    return (
+                      <td key={sub} className="px-4 py-3 text-center print:border print:border-slate-300">
+                        {markObj ? markObj.marks_obtained : '-'}
+                      </td>
+                    );
+                  })}
+                  <td className="px-4 py-3 text-center font-semibold text-slate-800 print:border print:border-slate-300">{student.totalObtained} / {student.totalMax}</td>
                   <td className="px-4 py-3 text-center print:border print:border-slate-300">{student.percentage}%</td>
                   <td className="px-4 py-3 text-center font-medium print:border print:border-slate-300">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium print:border-none print:p-0 print:text-black ${
@@ -115,6 +140,16 @@ export default function ExamResultsClient({
                     }`}>
                       {student.grade}
                     </span>
+                  </td>
+                  <td className="px-4 py-3 text-center font-bold text-indigo-700 print:border print:border-slate-300">
+                    {
+                      student.percentage >= 80 ? '5.00' :
+                      student.percentage >= 70 ? '4.00' :
+                      student.percentage >= 60 ? '3.50' :
+                      student.percentage >= 50 ? '3.00' :
+                      student.percentage >= 40 ? '2.00' :
+                      student.percentage >= 33 ? '1.00' : '0.00'
+                    }
                   </td>
                 </tr>
               ))}
