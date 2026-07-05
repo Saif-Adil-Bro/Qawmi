@@ -1,6 +1,7 @@
 "use server";
 
-import { createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { getAuthMadrasaId } from "./students";
 
 export async function registerMadrasa(formData: FormData) {
   const madrasaName = formData.get("madrasaName") as string;
@@ -66,4 +67,22 @@ export async function registerMadrasa(formData: FormData) {
   }
 
   return { success: true, message: "Madrasa registered successfully!" };
+}
+
+
+export async function getMadrasaDetails() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const madrasaId = await getAuthMadrasaId(supabase, user);
+  if (!madrasaId) return null;
+  
+  const { data, error } = await supabase
+    .from("madrasas")
+    .select("*")
+    .eq("id", madrasaId)
+    .single();
+    
+  if (error) return null;
+  return data;
 }

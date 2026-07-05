@@ -14,6 +14,13 @@ export default async function ExamsPage() {
           <p className="text-slate-500 text-sm">মাদরাসার সকল পরীক্ষার তালিকা ও ফলাফল</p>
         </div>
         <Link
+          href="/dashboard/exams/question-bank"
+          className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-md hover:bg-indigo-100 transition flex items-center space-x-2"
+        >
+          <FileText className="w-4 h-4" />
+          <span>প্রশ্নব্যাংক (Question Bank)</span>
+        </Link>
+        <Link
           href="/dashboard/exams/new"
           className="bg-slate-900 text-white px-4 py-2 rounded-md hover:bg-slate-800 transition flex items-center space-x-2"
         >
@@ -89,6 +96,27 @@ export default async function ExamsPage() {
                         title="মেধাতালিকা (Merit List)"
                       >
                         <Trophy className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={`/dashboard/exams/${exam.id}/routine`}
+                        className="inline-flex items-center justify-center p-2 text-indigo-600 hover:bg-indigo-50 rounded-md transition border border-transparent hover:border-indigo-200"
+                        title="পরীক্ষার রুটিন (Exam Routine)"
+                      >
+                        <FileText className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={`/dashboard/exams/${exam.id}/routine`}
+                        className="inline-flex items-center justify-center p-2 text-indigo-600 hover:bg-indigo-50 rounded-md transition border border-transparent hover:border-indigo-200"
+                        title="পরীক্ষার রুটিন (Exam Routine)"
+                      >
+                        <FileText className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={`/dashboard/exams/${exam.id}/routine`}
+                        className="inline-flex items-center justify-center p-2 text-indigo-600 hover:bg-indigo-50 rounded-md transition border border-transparent hover:border-indigo-200"
+                        title="পরীক্ষার রুটিন (Exam Routine)"
+                      >
+                        <FileText className="w-4 h-4" />
                       </Link>
                       <Link
                         href={`/dashboard/exams/${exam.id}/setup`}

@@ -8,12 +8,14 @@ export default function MeritListClient({
   examId, 
   classes, 
   examTitle, 
-  examYear 
+  examYear,
+  madrasaInfo
 }: { 
   examId: string, 
   classes: { id: string, name: string }[],
   examTitle: string,
-  examYear: string
+  examYear: string,
+  madrasaInfo?: any
 }) {
   const [classId, setClassId] = useState("");
   const [topCount, setTopCount] = useState<number>(10);
@@ -100,7 +102,11 @@ export default function MeritListClient({
       </div>
 
       <div className="hidden print:block mb-8 text-center border-b-2 pb-4 border-indigo-900">
-        <h2 className="text-2xl font-bold text-slate-900">{examTitle} - {examYear}</h2>
+        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">{madrasaInfo?.name || "Qawmi Madrasa"}</h1>
+        {madrasaInfo?.address && <p className="text-sm text-slate-600 mb-1">{madrasaInfo.address}</p>}
+        {madrasaInfo?.phone && <p className="text-sm text-slate-600 mb-4">মোবাইল: {madrasaInfo.phone}</p>}
+        
+        <h2 className="text-2xl font-bold text-slate-800">{examTitle} - {examYear}</h2>
         <h3 className="text-xl font-bold text-indigo-800 mt-2 flex items-center justify-center space-x-2">
           <span>মেধাতালিকা (শীর্ষ {topCount} জন)</span>
         </h3>

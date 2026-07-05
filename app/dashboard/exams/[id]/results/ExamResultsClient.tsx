@@ -8,12 +8,14 @@ export default function ExamResultsClient({
   examId, 
   classes, 
   examTitle, 
-  examYear 
+  examYear,
+  madrasaInfo
 }: { 
   examId: string, 
   classes: { id: string, name: string }[],
   examTitle: string,
-  examYear: string
+  examYear: string,
+  madrasaInfo?: any
 }) {
   const [classId, setClassId] = useState("");
   const [results, setResults] = useState<any[]>([]);
