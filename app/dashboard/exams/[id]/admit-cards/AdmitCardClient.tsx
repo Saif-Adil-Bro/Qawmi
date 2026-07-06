@@ -4,6 +4,22 @@ import { useState } from "react";
 import { getStudentsByClass } from "@/app/actions/exams";
 import { Printer, User } from "lucide-react";
 
+const getDirectPhotoUrl = (url: string | null | undefined): string | undefined => {
+  if (!url) return undefined;
+  let fetchUrl = url.trim();
+  if (fetchUrl.includes("drive.google.com")) {
+    const fileDMatch = fetchUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    const idMatch = fetchUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    const dMatch = fetchUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    
+    const fileId = (fileDMatch && fileDMatch[1]) || (idMatch && idMatch[1]) || (dMatch && dMatch[1]);
+    if (fileId) {
+      return `https://drive.google.com/uc?export=download&id=${fileId}`;
+    }
+  }
+  return fetchUrl;
+};
+
 export default function AdmitCardClient({ 
    examId, 
    classes, 
@@ -104,9 +120,20 @@ export default function AdmitCardClient({
               {/* Body */}
               <div className="flex-1 flex gap-8">
                 {/* Photo Placeholder */}
-                <div className="w-32 h-32 border-2 border-dashed border-slate-400 rounded-md flex items-center justify-center bg-slate-50 relative flex-shrink-0 mt-2">
-                  <User className="w-12 h-12 text-slate-300" />
-                  <span className="absolute bottom-2 text-xs font-bold text-slate-400">ছবি</span>
+                <div className="w-32 h-32 border-2 border-slate-400 rounded-md flex items-center justify-center bg-slate-50 relative flex-shrink-0 mt-2 overflow-hidden">
+                  {student.photo_url ? (
+                    <img 
+                      src={getDirectPhotoUrl(student.photo_url)} 
+                      alt="Photo" 
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <>
+                      <User className="w-12 h-12 text-slate-300" />
+                      <span className="absolute bottom-2 text-xs font-bold text-slate-400">ছবি</span>
+                    </>
+                  )}
                 </div>
 
                 {/* Details */}
