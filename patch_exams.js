@@ -1,76 +1,42 @@
 const fs = require('fs');
-let code = fs.readFileSync('app/actions/exams.ts', 'utf8');
+let code = fs.readFileSync('app/dashboard/exams/page.tsx', 'utf8');
 
-code = code.replace(`  const marksMap = new Map();
-  results?.forEach(r => {
-    marksMap.set(r.student_id, { marks: r.marks_obtained, total: r.total_marks });
-  });
+const target = `                      <Link
+                        href={\`/dashboard/exams/\${exam.id}/routine\`}
+                        className="inline-flex items-center justify-center p-2 text-indigo-600 hover:bg-indigo-50 rounded-md transition border border-transparent hover:border-indigo-200"
+                        title="পরীক্ষার রুটিন (Exam Routine)"
+                      >
+                        <FileText className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={\`/dashboard/exams/\${exam.id}/routine\`}
+                        className="inline-flex items-center justify-center p-2 text-indigo-600 hover:bg-indigo-50 rounded-md transition border border-transparent hover:border-indigo-200"
+                        title="পরীক্ষার রুটিন (Exam Routine)"
+                      >
+                        <FileText className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={\`/dashboard/exams/\${exam.id}/routine\`}
+                        className="inline-flex items-center justify-center p-2 text-indigo-600 hover:bg-indigo-50 rounded-md transition border border-transparent hover:border-indigo-200"
+                        title="পরীক্ষার রুটিন (Exam Routine)"
+                      >
+                        <FileText className="w-4 h-4" />
+                      </Link>
+`;
 
-  return students.map(s => ({
-    ...s,
-    marks_obtained: marksMap.get(s.id)?.marks || '',
-    total_marks: marksMap.get(s.id)?.total || 100
-  }));
+const replacement = `                      <Link
+                        href={\`/dashboard/exams/\${exam.id}/routine\`}
+                        className="inline-flex items-center justify-center p-2 text-indigo-600 hover:bg-indigo-50 rounded-md transition border border-transparent hover:border-indigo-200"
+                        title="পরীক্ষার রুটিন (Exam Routine)"
+                      >
+                        <FileText className="w-4 h-4" />
+                      </Link>
+`;
+
+if (code.includes(target)) {
+    code = code.replace(target, replacement);
+    fs.writeFileSync('app/dashboard/exams/page.tsx', code);
+    console.log("Patched successfully");
+} else {
+    console.log("Target not found");
 }
-
-export async function saveExamMarks(examId: string, subjectName: string, marksData: { student_id: string, marks_obtained: number, total_marks: number }[]) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) return { error: "Unauthorized" };
-  const finalMadrasaId = await getAuthMadrasaId(supabase, user);
-  if (!finalMadrasaId) return { error: "Madrasa not found" };
-
-  const recordsToUpsert = marksData.map(record => ({
-    madrasa_id: finalMadrasaId,
-    exam_id: examId,
-    student_id: record.student_id,
-    subject_name: subjectName,
-    marks_obtained: record.marks_obtained,
-    total_marks: record.total_marks
-  }));`, `  const marksMap = new Map();
-  results?.forEach(r => {
-    marksMap.set(r.student_id, { 
-      marks: r.marks_obtained, 
-      total: r.total_marks,
-      written: r.written_marks,
-      oral: r.oral_marks,
-      tutorial: r.tutorial_marks,
-      attendance: r.attendance_marks
-    });
-  });
-
-  return students.map(s => ({
-    ...s,
-    marks_obtained: marksMap.get(s.id)?.marks || '',
-    total_marks: marksMap.get(s.id)?.total || 100,
-    written_marks: marksMap.get(s.id)?.written || '',
-    oral_marks: marksMap.get(s.id)?.oral || '',
-    tutorial_marks: marksMap.get(s.id)?.tutorial || '',
-    attendance_marks: marksMap.get(s.id)?.attendance || '',
-  }));
-}
-
-export async function saveExamMarks(examId: string, subjectName: string, marksData: { student_id: string, marks_obtained: number, total_marks: number, written_marks?: number, oral_marks?: number, tutorial_marks?: number, attendance_marks?: number }[]) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) return { error: "Unauthorized" };
-  const finalMadrasaId = await getAuthMadrasaId(supabase, user);
-  if (!finalMadrasaId) return { error: "Madrasa not found" };
-
-  const recordsToUpsert = marksData.map(record => ({
-    madrasa_id: finalMadrasaId,
-    exam_id: examId,
-    student_id: record.student_id,
-    subject_name: subjectName,
-    marks_obtained: record.marks_obtained,
-    total_marks: record.total_marks,
-    written_marks: record.written_marks || 0,
-    oral_marks: record.oral_marks || 0,
-    tutorial_marks: record.tutorial_marks || 0,
-    attendance_marks: record.attendance_marks || 0
-  }));`);
-
-fs.writeFileSync('app/actions/exams.ts', code);
-console.log('patched');

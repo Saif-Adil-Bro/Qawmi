@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getExams } from "@/app/actions/exams";
-import { Plus, ArrowLeft, PenTool, FileText, Printer, IdCard, Trophy, Settings } from "lucide-react";
+import { Plus, ArrowLeft, PenTool, FileText, Printer, IdCard, Trophy, Settings, FileSignature } from "lucide-react";
 import { format } from "date-fns";
 
 export default async function ExamsPage() {
@@ -105,18 +105,11 @@ export default async function ExamsPage() {
                         <FileText className="w-4 h-4" />
                       </Link>
                       <Link
-                        href={`/dashboard/exams/${exam.id}/routine`}
-                        className="inline-flex items-center justify-center p-2 text-indigo-600 hover:bg-indigo-50 rounded-md transition border border-transparent hover:border-indigo-200"
-                        title="পরীক্ষার রুটিন (Exam Routine)"
+                        href={`/dashboard/exams/${exam.id}/paper`}
+                        className="inline-flex items-center justify-center p-2 text-violet-600 hover:bg-violet-50 rounded-md transition border border-transparent hover:border-violet-200"
+                        title="প্রশ্নপত্র বিল্ডার (Paper Generator)"
                       >
-                        <FileText className="w-4 h-4" />
-                      </Link>
-                      <Link
-                        href={`/dashboard/exams/${exam.id}/routine`}
-                        className="inline-flex items-center justify-center p-2 text-indigo-600 hover:bg-indigo-50 rounded-md transition border border-transparent hover:border-indigo-200"
-                        title="পরীক্ষার রুটিন (Exam Routine)"
-                      >
-                        <FileText className="w-4 h-4" />
+                        <FileSignature className="w-4 h-4" />
                       </Link>
                       <Link
                         href={`/dashboard/exams/${exam.id}/setup`}

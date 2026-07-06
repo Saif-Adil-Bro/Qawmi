@@ -86,3 +86,59 @@ export async function getMadrasaDetails() {
   if (error) return null;
   return data;
 }
+
+export async function updateMadrasaDetails(formData: FormData) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "ইউজার লগইন করা নেই" };
+    
+    const madrasaId = await getAuthMadrasaId(supabase, user);
+    if (!madrasaId) return { error: "মাদরাসা আইডি পাওয়া যায়নি" };
+    
+    const name = formData.get("name") as string;
+    const address = formData.get("address") as string;
+    const phone = formData.get("phone") as string;
+    const logoFile = formData.get("logo") as File | null;
+    
+    if (!name) {
+      return { error: "মাদরাসার নাম অবশ্যই দিতে হবে" };
+    }
+    
+    // Update madrasas table
+    const { error: updateError } = await supabase
+      .from("madrasas")
+      .update({
+        name,
+        address,
+        contact_phone: phone,
+      })
+      .eq("id", madrasaId);
+      
+    if (updateError) {
+      return { error: "তথ্য আপডেট করতে ব্যর্থ হয়েছে: " + updateError.message };
+    }
+    
+    // Upload logo if provided
+    if (logoFile && logoFile.size > 0) {
+      const filePath = `madrasa_logo_${madrasaId}.png`;
+      const arrayBuffer = await logoFile.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      
+      const { error: uploadError } = await supabase.storage
+        .from('logos')
+        .upload(filePath, buffer, {
+          contentType: logoFile.type,
+          upsert: true
+        });
+        
+      if (uploadError) {
+        return { error: "লোগো আপলোড করতে ব্যর্থ হয়েছে: " + uploadError.message };
+      }
+    }
+    
+    return { success: true, message: "মাদরাসার তথ্য সফলভাবে আপডেট করা হয়েছে।" };
+  } catch (error: any) {
+    return { error: error?.message || "একটি অজানা সমস্যা হয়েছে" };
+  }
+}
