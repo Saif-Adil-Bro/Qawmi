@@ -4,6 +4,7 @@ import { getExamById } from "@/app/actions/exams";
 import { getClasses } from "@/app/actions/students";
 import { notFound } from "next/navigation";
 import ExamSetupClient from "./ExamSetupClient";
+import ExamNavTabs from "../ExamNavTabs";
 
 export default async function ExamSetupPage({
   params,
@@ -36,6 +37,8 @@ export default async function ExamSetupPage({
           <p className="text-slate-500 text-sm">{exam.title} - {exam.year}</p>
         </div>
       </div>
+
+      <ExamNavTabs examId={examId} />
 
       <div className="bg-white rounded-xl shadow-sm border p-6">
         <ExamSetupClient examId={examId} classes={classes} />

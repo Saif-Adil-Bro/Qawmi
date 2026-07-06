@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Settings, List, Trophy, FileText, FileSignature } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { getExamById, getExamSubjects } from "@/app/actions/exams";
 import { getClasses } from "@/app/actions/students";
 import { getSubjects } from "@/app/actions/subjects";
@@ -7,6 +7,7 @@ import { getQuestions } from "@/app/actions/questions";
 import { getMadrasaDetails as getMadrasaInfo } from "@/app/actions/tenant";
 import { notFound } from "next/navigation";
 import PaperGeneratorClient from "./PaperGeneratorClient";
+import ExamNavTabs from "../ExamNavTabs";
 
 export default async function ExamPaperPage({
   params,
@@ -45,43 +46,7 @@ export default async function ExamPaperPage({
         </div>
       </div>
 
-      <div className="flex space-x-1 border-b border-slate-200 overflow-x-auto">
-        <Link
-          href={`/dashboard/exams/${examId}/setup`}
-          className="px-4 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 flex items-center space-x-2 whitespace-nowrap"
-        >
-          <Settings className="w-4 h-4" />
-          <span>Setup Subjects</span>
-        </Link>
-        <Link
-          href={`/dashboard/exams/${examId}/routine`}
-          className="px-4 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 flex items-center space-x-2 whitespace-nowrap"
-        >
-          <List className="w-4 h-4" />
-          <span>Routine</span>
-        </Link>
-        <Link
-          href={`/dashboard/exams/${examId}/paper`}
-          className="px-4 py-3 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600 flex items-center space-x-2 whitespace-nowrap"
-        >
-          <FileSignature className="w-4 h-4" />
-          <span>Paper Generator</span>
-        </Link>
-        <Link
-          href={`/dashboard/exams/${examId}/marks`}
-          className="px-4 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 flex items-center space-x-2 whitespace-nowrap"
-        >
-          <FileText className="w-4 h-4" />
-          <span>Marks Entry</span>
-        </Link>
-        <Link
-          href={`/dashboard/exams/${examId}/results`}
-          className="px-4 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 flex items-center space-x-2 whitespace-nowrap"
-        >
-          <Trophy className="w-4 h-4" />
-          <span>Results</span>
-        </Link>
-      </div>
+      <ExamNavTabs examId={examId} />
 
       <PaperGeneratorClient 
         examId={examId} 

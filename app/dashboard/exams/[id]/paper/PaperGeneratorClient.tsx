@@ -29,8 +29,6 @@ export default function PaperGeneratorClient({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const printRef = useRef<HTMLDivElement>(null);
-
   // Available questions for selected class and subject
   const availableQuestions = questions.filter(
     (q) => q.class_id === classId && q.subject_id === subjectId
@@ -103,120 +101,14 @@ export default function PaperGeneratorClient({
   };
 
   const handlePrint = () => {
-    if (printRef.current) {
-      const printContents = printRef.current.innerHTML;
-      
-      // Create a hidden iframe for print isolation
-      const iframe = document.createElement("iframe");
-      iframe.style.position = "fixed";
-      iframe.style.bottom = "0";
-      iframe.style.right = "0";
-      iframe.style.width = "0";
-      iframe.style.height = "0";
-      iframe.style.border = "none";
-      document.body.appendChild(iframe);
-      
-      const doc = iframe.contentWindow?.document || iframe.contentDocument;
-      if (doc) {
-        doc.open();
-        doc.write(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>${paperTitle || "Exam Paper"}</title>
-              <style>
-                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;700&display=swap');
-                
-                body {
-                  font-family: 'Noto Sans Bengali', sans-serif, system-ui;
-                  padding: 20px 40px;
-                  color: #000;
-                  background-color: #fff;
-                  margin: 0;
-                  -webkit-print-color-adjust: exact;
-                  print-color-adjust: exact;
-                }
-                
-                .text-center { text-align: center; }
-                .font-bold { font-weight: 700; }
-                .font-medium { font-weight: 500; }
-                .text-3xl { font-size: 24px; line-height: 1.3; margin: 0 0 8px 0; }
-                .text-2xl { font-size: 18px; line-height: 1.3; margin: 0 0 6px 0; }
-                .text-xl { font-size: 16px; line-height: 1.3; margin: 0 0 6px 0; }
-                .text-lg { font-size: 15px; }
-                .text-base { font-size: 13px; }
-                .text-slate-900 { color: #000; }
-                .mb-2 { margin-bottom: 8px; }
-                .mb-1 { margin-bottom: 4px; }
-                .pb-4 { padding-bottom: 16px; }
-                .mb-6 { margin-bottom: 24px; }
-                
-                /* Border bottom 3px */
-                .border-b-\\[3px\\] { border-bottom: 3px solid #000; }
-                .border-black { border-color: #000; }
-                
-                /* Flexbox classes */
-                .flex { display: flex; }
-                .justify-between { justify-content: space-between; }
-                .items-start { align-items: flex-start; }
-                .items-center { align-items: center; }
-                .flex-1 { flex: 1 1 0%; }
-                .shrink-0 { flex-shrink: 0; }
-                .gap-4 { gap: 16px; }
-                
-                /* Margin classes */
-                .mt-6 { margin-top: 24px; }
-                .mt-4 { margin-top: 16px; }
-                .mt-2 { margin-top: 8px; }
-                .mt-1 { margin-top: 4px; }
-                .px-4 { padding-left: 16px; padding-right: 16px; }
-                .ml-4 { margin-left: 16px; }
-                .ml-2 { margin-left: 8px; }
-                .mr-2 { margin-right: 8px; }
-                
-                /* Spacing stack for questions */
-                .space-y-6 > * + * { margin-top: 24px; }
-                
-                /* Grid layout for MCQ options */
-                .grid { display: grid; }
-                .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-                
-                /* Print specific behaviors */
-                @media print {
-                  body {
-                    padding: 0;
-                    margin: 15mm 15mm 15mm 15mm;
-                  }
-                  .break-inside-avoid {
-                    page-break-inside: avoid;
-                    break-inside: avoid;
-                  }
-                }
-              </style>
-            </head>
-            <body>
-              ${printContents}
-              <script>
-                // Wait for Noto Sans Bengali web font to load fully before printing
-                document.fonts.ready.then(function() {
-                  window.focus();
-                  window.print();
-                  setTimeout(function() {
-                    window.parent.document.body.removeChild(window.frameElement);
-                  }, 500);
-                });
-              </script>
-            </body>
-          </html>
-        `);
-        doc.close();
-      }
-    }
+    window.print();
   };
 
   return (
-    <div className="space-y-6">
-      {/* Filters & Actions */}
+    <div>
+      {/* Interactive Layout: Hidden when printing */}
+      <div className="space-y-6 print:hidden">
+        {/* Filters & Actions */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 justify-between items-end">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full md:w-1/2">
           <div>
@@ -432,10 +324,11 @@ export default function PaperGeneratorClient({
           <p className="text-slate-400">Choose a class and subject above to start generating a question paper.</p>
         </div>
       )}
+      </div>
 
-      {/* Hidden Print Layout */}
-      <div className="hidden">
-        <div ref={printRef} className="p-8 max-w-4xl mx-auto text-slate-900" style={{ fontFamily: 'sans-serif', backgroundColor: '#fff' }}>
+      {/* Printable Layout: Visible ONLY when printing */}
+      <div className="hidden print:block print:bg-white print:text-black print:p-0 print:m-0 w-full">
+        <div className="p-8 max-w-4xl mx-auto text-black bg-white" style={{ fontFamily: 'sans-serif' }}>
           <div className="text-center border-b-[3px] border-black pb-4 mb-6">
             <h1 className="text-3xl font-bold mb-2">{madrasa?.name || 'Madrasa Name'}</h1>
             {madrasa?.address && <p className="text-base mb-2">{madrasa.address}</p>}
@@ -459,7 +352,7 @@ export default function PaperGeneratorClient({
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
                     <p className="text-lg leading-relaxed">{q.question_text}</p>
-                    <span className="text-base font-bold ml-4">[{q.marks}]</span>
+                    <span className="text-base font-bold ml-4 shrink-0">[{q.marks}]</span>
                   </div>
                   {q.question_type === "MCQ" && q.options && (
                     <div className="grid grid-cols-2 gap-4 mt-4 ml-2">

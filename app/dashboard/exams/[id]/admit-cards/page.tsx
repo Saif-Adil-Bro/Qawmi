@@ -5,6 +5,7 @@ import { getClasses } from "@/app/actions/students";
 import { getMadrasaInfo } from "@/lib/getMadrasaInfo";
 import { notFound } from "next/navigation";
 import AdmitCardClient from "./AdmitCardClient";
+import ExamNavTabs from "../ExamNavTabs";
 
 export default async function AdmitCardsPage({
   params,
@@ -38,6 +39,8 @@ export default async function AdmitCardsPage({
           <p className="text-slate-500 text-sm">{exam.title} - {exam.year}</p>
         </div>
       </div>
+
+      <ExamNavTabs examId={examId} />
 
       <div className="bg-white rounded-xl shadow-sm border p-6 print:shadow-none print:border-none print:p-0 print:bg-transparent">
         <AdmitCardClient 

@@ -2,6 +2,7 @@
 
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { getAuthMadrasaId } from "./students";
+import { revalidatePath } from "next/cache";
 
 export async function registerMadrasa(formData: FormData) {
   const madrasaName = formData.get("madrasaName") as string;
@@ -100,13 +101,16 @@ export async function updateMadrasaDetails(formData: FormData) {
     const address = formData.get("address") as string;
     const phone = formData.get("phone") as string;
     const logoFile = formData.get("logo") as File | null;
+    const logoUrl = formData.get("logoUrl") as string | null;
     
     if (!name) {
       return { error: "মাদরাসার নাম অবশ্যই দিতে হবে" };
     }
     
-    // Update madrasas table
-    const { error: updateError } = await supabase
+    const adminClient = await createAdminClient();
+
+    // Update madrasas table using admin client to bypass RLS policies
+    const { error: updateError } = await adminClient
       .from("madrasas")
       .update({
         name,
@@ -119,13 +123,13 @@ export async function updateMadrasaDetails(formData: FormData) {
       return { error: "তথ্য আপডেট করতে ব্যর্থ হয়েছে: " + updateError.message };
     }
     
-    // Upload logo if provided
+    // Upload logo using admin client if file provided
     if (logoFile && logoFile.size > 0) {
       const filePath = `madrasa_logo_${madrasaId}.png`;
       const arrayBuffer = await logoFile.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await adminClient.storage
         .from('logos')
         .upload(filePath, buffer, {
           contentType: logoFile.type,
@@ -135,7 +139,50 @@ export async function updateMadrasaDetails(formData: FormData) {
       if (uploadError) {
         return { error: "লোগো আপলোড করতে ব্যর্থ হয়েছে: " + uploadError.message };
       }
+    } else if (logoUrl && logoUrl.trim().length > 0) {
+      // Fetch and upload logo from link (CDN or Google Drive)
+      let fetchUrl = logoUrl.trim();
+      if (fetchUrl.includes("drive.google.com")) {
+        // Parse Google Drive URL
+        const fileDMatch = fetchUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+        const idMatch = fetchUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        const dMatch = fetchUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        
+        const fileId = (fileDMatch && fileDMatch[1]) || (idMatch && idMatch[1]) || (dMatch && dMatch[1]);
+        if (fileId) {
+          fetchUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+        }
+      }
+      
+      try {
+        const fetchRes = await fetch(fetchUrl);
+        if (!fetchRes.ok) {
+          return { error: `লিংক থেকে লোগো ডাউনলোড করতে ব্যর্থ হয়েছে (HTTP Status: ${fetchRes.status})` };
+        }
+        
+        const contentType = fetchRes.headers.get("content-type") || "image/png";
+        const arrayBuffer = await fetchRes.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        
+        const filePath = `madrasa_logo_${madrasaId}.png`;
+        const { error: uploadError } = await adminClient.storage
+          .from('logos')
+          .upload(filePath, buffer, {
+            contentType: contentType,
+            upsert: true
+          });
+          
+        if (uploadError) {
+          return { error: "ডাউনলোড করা লোগো সংরক্ষণ করতে ব্যর্থ হয়েছে: " + uploadError.message };
+        }
+      } catch (err: any) {
+        return { error: "লিংক থেকে লোগো ডাউনলোড করতে ব্যর্থ হয়েছে। অনুগ্রহ করে সচল ইমেজ লিংক ব্যবহার করুন। ভুল: " + err.message };
+      }
     }
+    
+    // Clear cache to show the updated settings immediately
+    revalidatePath("/dashboard/settings");
+    revalidatePath("/dashboard", "layout");
     
     return { success: true, message: "মাদরাসার তথ্য সফলভাবে আপডেট করা হয়েছে।" };
   } catch (error: any) {
