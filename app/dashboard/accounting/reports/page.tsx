@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { getAccountingReport } from "@/app/actions/accounting";
 import { ArrowLeft, FileText, TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import Link from "next/link";
+import { getMadrasaProfileWithLogo } from "@/app/actions/tenant";
+import PrintLetterpad from "@/app/components/PrintLetterpad";
 
 export default function AccountingReportPage() {
   const currentMonth = new Date().getMonth() + 1;
@@ -14,6 +16,20 @@ export default function AccountingReportPage() {
   
   const [report, setReport] = useState<{ totalIncome: number, totalExpense: number, netBalance: number } | null>(null);
   const [loading, setLoading] = useState(false);
+  
+  const [madrasaInfo, setMadrasaInfo] = useState<any>(null);
+  const [logoUrl, setLogoUrl] = useState<string>("");
+
+  useEffect(() => {
+    async function loadMadrasa() {
+      const res = await getMadrasaProfileWithLogo();
+      if (res) {
+        setMadrasaInfo(res.madrasa);
+        setLogoUrl(res.logoUrl);
+      }
+    }
+    loadMadrasa();
+  }, []);
 
   useEffect(() => {
     async function loadReport() {
@@ -92,60 +108,62 @@ export default function AccountingReportPage() {
           </div>
         </div>
 
-        <div className="hidden print:block mb-8 text-center">
-          <h2 className="text-2xl font-bold text-slate-900">মাসিক হিসাবরক্ষণ রিপোর্ট</h2>
-          <p className="text-slate-600 mt-1 text-lg">
-            {month} / {year}
-          </p>
-        </div>
-
-        {loading ? (
-          <div className="py-12 text-center text-slate-500">রিপোর্ট তৈরি হচ্ছে...</div>
-        ) : report ? (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-6 print:border-2 print:border-black print:bg-white">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-emerald-600 print:text-black font-medium">মোট আয় (Income)</div>
-                  <TrendingUp className="w-6 h-6 text-emerald-600 print:text-black" />
-                </div>
-                <div className="text-3xl font-bold text-emerald-900 print:text-black">
-                  ৳ {report.totalIncome.toLocaleString('bn-BD')}
-                </div>
-              </div>
-
-              <div className="bg-red-50 border border-red-100 rounded-xl p-6 print:border-2 print:border-black print:bg-white">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-red-600 print:text-black font-medium">মোট ব্যয় (Expense)</div>
-                  <TrendingDown className="w-6 h-6 text-red-600 print:text-black" />
-                </div>
-                <div className="text-3xl font-bold text-red-900 print:text-black">
-                  ৳ {report.totalExpense.toLocaleString('bn-BD')}
-                </div>
-              </div>
-
-              <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 print:border-2 print:border-black print:bg-white">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-blue-600 print:text-black font-medium">নিট ব্যালেন্স (Balance)</div>
-                  <Wallet className="w-6 h-6 text-blue-600 print:text-black" />
-                </div>
-                <div className={`text-3xl font-bold ${report.netBalance >= 0 ? 'text-blue-900 print:text-black' : 'text-red-600 print:text-black'}`}>
-                  {report.netBalance < 0 ? '-' : ''}৳ {Math.abs(report.netBalance).toLocaleString('bn-BD')}
-                </div>
-              </div>
-            </div>
-
-            <div className="border-t border-slate-200 pt-8 print:border-black">
-              <h3 className="text-lg font-bold text-slate-800 mb-4 print:text-black">রিপোর্টের সারসংক্ষেপ</h3>
-              <p className="text-slate-600 print:text-black">
-                {month}/{year} মাসে মাদরাসার মোট আয় হয়েছে <strong>৳{report.totalIncome.toLocaleString('bn-BD')}</strong> এবং মোট ব্যয় হয়েছে <strong>৳{report.totalExpense.toLocaleString('bn-BD')}</strong>। 
-                মাসের শেষে নিট ব্যালেন্স দাঁড়াচ্ছে <strong className={report.netBalance >= 0 ? 'text-emerald-600 print:text-black' : 'text-red-600 print:text-black'}>
-                  {report.netBalance < 0 ? '-' : ''}৳{Math.abs(report.netBalance).toLocaleString('bn-BD')}
-                </strong>।
-              </p>
-            </div>
+        <PrintLetterpad madrasaInfo={madrasaInfo} logoUrl={logoUrl}>
+          <div className="mb-6 text-center border-b border-slate-100 pb-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-800">মাসিক হিসাবরক্ষণ রিপোর্ট</h2>
+            <p className="text-slate-500 font-semibold text-xs mt-1.5">
+              মাস: {month === "1" ? "জানুয়ারি" : month === "2" ? "ফেব্রুয়ারি" : month === "3" ? "মার্চ" : month === "4" ? "এপ্রিল" : month === "5" ? "মে" : month === "6" ? "জুন" : month === "7" ? "জুলাই" : month === "8" ? "আগস্ট" : month === "9" ? "সেপ্টেম্বর" : month === "10" ? "অক্টোবর" : month === "11" ? "নভেম্বর" : "ডিসেম্বর"} / বছর: {year}
+            </p>
           </div>
-        ) : null}
+
+          {loading ? (
+            <div className="py-12 text-center text-slate-500">রিপোর্ট তৈরি হচ্ছে...</div>
+          ) : report ? (
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-6 print:border-2 print:border-black print:bg-white">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-emerald-600 print:text-black font-medium">মোট আয় (Income)</div>
+                    <TrendingUp className="w-6 h-6 text-emerald-600 print:text-black" />
+                  </div>
+                  <div className="text-3xl font-bold text-emerald-900 print:text-black">
+                    ৳ {report.totalIncome.toLocaleString('bn-BD')}
+                  </div>
+                </div>
+
+                <div className="bg-red-50 border border-red-100 rounded-xl p-6 print:border-2 print:border-black print:bg-white">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-red-600 print:text-black font-medium">মোট ব্যয় (Expense)</div>
+                    <TrendingDown className="w-6 h-6 text-red-600 print:text-black" />
+                  </div>
+                  <div className="text-3xl font-bold text-red-900 print:text-black">
+                    ৳ {report.totalExpense.toLocaleString('bn-BD')}
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 print:border-2 print:border-black print:bg-white">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-blue-600 print:text-black font-medium">নিট ব্যালেন্স (Balance)</div>
+                    <Wallet className="w-6 h-6 text-blue-600 print:text-black" />
+                  </div>
+                  <div className={`text-3xl font-bold ${report.netBalance >= 0 ? 'text-blue-900 print:text-black' : 'text-red-600 print:text-black'}`}>
+                    {report.netBalance < 0 ? '-' : ''}৳ {Math.abs(report.netBalance).toLocaleString('bn-BD')}
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-200 pt-8 print:border-black">
+                <h3 className="text-lg font-bold text-slate-800 mb-4 print:text-black">রিপোর্টের সারসংক্ষেপ</h3>
+                <p className="text-slate-600 print:text-black">
+                  {month}/{year} মাসে মাদরাসার মোট আয় হয়েছে <strong>৳{report.totalIncome.toLocaleString('bn-BD')}</strong> এবং মোট ব্যয় হয়েছে <strong>৳{report.totalExpense.toLocaleString('bn-BD')}</strong>। 
+                  মাসের শেষে নিট ব্যালেন্স দাঁড়াচ্ছে <strong className={report.netBalance >= 0 ? 'text-emerald-600 print:text-black' : 'text-red-600 print:text-black'}>
+                    {report.netBalance < 0 ? '-' : ''}৳{Math.abs(report.netBalance).toLocaleString('bn-BD')}
+                  </strong>।
+                </p>
+              </div>
+            </div>
+          ) : null}
+        </PrintLetterpad>
       </div>
     </div>
   );

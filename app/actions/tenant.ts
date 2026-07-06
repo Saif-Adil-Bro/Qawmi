@@ -88,6 +88,22 @@ export async function getMadrasaDetails() {
   return data;
 }
 
+export async function getMadrasaProfileWithLogo() {
+  const madrasa = await getMadrasaDetails();
+  if (!madrasa) return null;
+  const supabase = await createClient();
+  const { data: { publicUrl } } = supabase.storage.from('logos').getPublicUrl(`madrasa_logo_${madrasa.id}.png`);
+  return {
+    madrasa: {
+      id: madrasa.id,
+      name: madrasa.name,
+      address: madrasa.address,
+      phone: madrasa.contact_phone || madrasa.phone,
+    },
+    logoUrl: publicUrl
+  };
+}
+
 export async function updateMadrasaDetails(formData: FormData) {
   try {
     const supabase = await createClient();
