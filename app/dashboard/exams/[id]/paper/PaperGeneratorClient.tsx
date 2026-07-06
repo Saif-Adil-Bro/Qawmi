@@ -194,11 +194,11 @@ export default function PaperGeneratorClient({
                       </div>
                       <span className="text-xs font-semibold text-slate-500">{q.marks} Marks</span>
                     </div>
-                    <p className="text-sm font-medium text-slate-800">{q.question_text}</p>
+                    <p className="text-sm font-medium text-slate-800 text-start" dir="auto">{q.question_text}</p>
                     {q.question_type === "MCQ" && q.options && (
                       <div className="mt-2 text-xs text-slate-500 grid grid-cols-2 gap-1">
                         {q.options.map((opt: string, i: number) => (
-                          <div key={i}>• {opt}</div>
+                          <div key={i} dir="auto" className="text-start">• {opt}</div>
                         ))}
                       </div>
                     )}
@@ -232,7 +232,8 @@ export default function PaperGeneratorClient({
                     type="text"
                     value={examName}
                     onChange={(e) => setExamName(e.target.value)}
-                    className="p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-xs w-full text-slate-800"
+                    dir="auto"
+                    className="p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-xs w-full text-slate-800 text-start"
                     placeholder="উদা: অর্ধবার্ষিক পরীক্ষা ২০২৬"
                   />
                 </div>
@@ -242,7 +243,8 @@ export default function PaperGeneratorClient({
                     type="text"
                     value={paperTitle}
                     onChange={(e) => setPaperTitle(e.target.value)}
-                    className="p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-xs w-full text-slate-800"
+                    dir="auto"
+                    className="p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-xs w-full text-slate-800 text-start"
                     placeholder="উদা: আল-কুরআন"
                   />
                 </div>
@@ -252,7 +254,8 @@ export default function PaperGeneratorClient({
                     type="text"
                     value={examTime}
                     onChange={(e) => setExamTime(e.target.value)}
-                    className="p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-xs w-full text-slate-800"
+                    dir="auto"
+                    className="p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-xs w-full text-slate-800 text-start"
                     placeholder="উদা: ২ ঘণ্টা ৩০ মিনিট"
                   />
                 </div>
@@ -262,7 +265,8 @@ export default function PaperGeneratorClient({
                     type="number"
                     value={totalMarks}
                     onChange={(e) => setTotalMarks(Number(e.target.value))}
-                    className="p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-xs w-full text-slate-800"
+                    dir="auto"
+                    className="p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none text-xs w-full text-slate-800 text-start"
                     placeholder="উদা: ১০০"
                   />
                 </div>
@@ -272,9 +276,9 @@ export default function PaperGeneratorClient({
             <div className="p-6 overflow-y-auto flex-1 bg-slate-50">
               <div className="bg-white p-6 shadow-sm border border-slate-200 min-h-full" style={{ fontFamily: 'sans-serif' }}>
                 <div className="text-center border-b-2 border-slate-800 pb-3 mb-6">
-                  <h1 className="text-xl font-bold mb-1 text-slate-900">{madrasa?.name || 'Madrasa Name'}</h1>
-                  {examName && <h2 className="text-md font-bold mb-0.5 text-slate-800">{examName}</h2>}
-                  <h3 className="text-sm font-semibold text-slate-700">{paperTitle}</h3>
+                  <h1 className="text-xl font-bold mb-1 text-slate-900" dir="auto">{madrasa?.name || 'Madrasa Name'}</h1>
+                  {examName && <h2 className="text-md font-bold mb-0.5 text-slate-800" dir="auto">{examName}</h2>}
+                  <h3 className="text-sm font-semibold text-slate-700" dir="auto">{paperTitle}</h3>
                   <div className="flex justify-between text-xs mt-4 font-medium text-slate-600">
                     <span>শ্রেণি: {classes.find((c) => c.id === classId)?.name}</span>
                     <span>বিষয়: {subjects.find((s) => s.id === subjectId)?.name}</span>
@@ -296,14 +300,14 @@ export default function PaperGeneratorClient({
                         <div className="font-semibold">{idx + 1}.</div>
                         <div className="flex-1">
                           <div className="flex justify-between items-start">
-                            <p className="font-medium text-slate-900">{q.question_text}</p>
+                            <p className="font-medium text-slate-900 text-start" dir="auto">{q.question_text}</p>
                             <span className="text-sm font-semibold ml-4">[{q.marks}]</span>
                           </div>
                           {q.question_type === "MCQ" && q.options && (
                             <div className="grid grid-cols-2 gap-2 mt-3 ml-2">
                               {q.options.map((opt: string, i: number) => (
-                                <div key={i} className="flex items-center text-sm">
-                                  <span className="mr-2">({String.fromCharCode(97 + i)})</span> {opt}
+                                <div key={i} className="flex items-center text-sm text-start" dir="auto">
+                                  <span className="mr-2 shrink-0">({String.fromCharCode(97 + i)})</span> <span>{opt}</span>
                                 </div>
                               ))}
                             </div>
@@ -330,10 +334,10 @@ export default function PaperGeneratorClient({
       <div className="hidden print:block print:bg-white print:text-black print:p-0 print:m-0 w-full">
         <div className="p-8 max-w-4xl mx-auto text-black bg-white" style={{ fontFamily: 'sans-serif' }}>
           <div className="text-center border-b-[3px] border-black pb-4 mb-6">
-            <h1 className="text-3xl font-bold mb-2">{madrasa?.name || 'Madrasa Name'}</h1>
-            {madrasa?.address && <p className="text-base mb-2">{madrasa.address}</p>}
-            {examName && <h2 className="text-2xl font-bold mb-1">{examName}</h2>}
-            <h3 className="text-xl font-bold mb-2">{paperTitle}</h3>
+            <h1 className="text-3xl font-bold mb-2" dir="auto">{madrasa?.name || 'Madrasa Name'}</h1>
+            {madrasa?.address && <p className="text-base mb-2" dir="auto">{madrasa.address}</p>}
+            {examName && <h2 className="text-2xl font-bold mb-1" dir="auto">{examName}</h2>}
+            <h3 className="text-xl font-bold mb-2" dir="auto">{paperTitle}</h3>
             
             <div className="flex justify-between text-base mt-6 font-bold px-4">
               <span>শ্রেণি: {classes.find((c) => c.id === classId)?.name}</span>
@@ -351,14 +355,14 @@ export default function PaperGeneratorClient({
                 <div className="font-bold text-lg">{idx + 1}.</div>
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
-                    <p className="text-lg leading-relaxed">{q.question_text}</p>
+                    <p className="text-lg leading-relaxed text-start" dir="auto">{q.question_text}</p>
                     <span className="text-base font-bold ml-4 shrink-0">[{q.marks}]</span>
                   </div>
                   {q.question_type === "MCQ" && q.options && (
                     <div className="grid grid-cols-2 gap-4 mt-4 ml-2">
                       {q.options.map((opt: string, i: number) => (
-                        <div key={i} className="flex items-center text-base">
-                          <span className="mr-2 font-medium">({String.fromCharCode(97 + i)})</span> {opt}
+                        <div key={i} className="flex items-center text-base text-start" dir="auto">
+                          <span className="mr-2 font-medium shrink-0">({String.fromCharCode(97 + i)})</span> <span>{opt}</span>
                         </div>
                       ))}
                     </div>

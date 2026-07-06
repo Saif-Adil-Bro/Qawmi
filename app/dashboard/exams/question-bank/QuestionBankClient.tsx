@@ -195,7 +195,8 @@ export default function QuestionBankClient({
                 value={newText}
                 onChange={(e) => setNewText(e.target.value)}
                 rows={3}
-                className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-slate-500 outline-none"
+                dir="auto"
+                className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-slate-500 outline-none text-start"
                 placeholder="Enter the question here..."
               />
             </div>
@@ -215,7 +216,8 @@ export default function QuestionBankClient({
                         newOpts[idx] = e.target.value;
                         setNewOptions(newOpts);
                       }}
-                      className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-slate-500 outline-none"
+                      dir="auto"
+                      className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-slate-500 outline-none text-start"
                       placeholder={`Option ${idx + 1}`}
                     />
                   </div>
@@ -273,11 +275,11 @@ export default function QuestionBankClient({
               {filteredQuestions.map((q) => (
                 <tr key={q.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4">
-                    <p className="font-medium text-slate-800 mb-1">{q.question_text}</p>
+                    <p className="font-medium text-slate-800 mb-1 text-start" dir="auto">{q.question_text}</p>
                     {q.question_type === "MCQ" && q.options && (
                       <ul className="list-disc list-inside text-xs text-slate-500 grid grid-cols-2 gap-1 mt-2">
                         {q.options.map((opt: string, i: number) => (
-                          <li key={i}>{opt}</li>
+                          <li key={i} dir="auto" className="text-start">{opt}</li>
                         ))}
                       </ul>
                     )}

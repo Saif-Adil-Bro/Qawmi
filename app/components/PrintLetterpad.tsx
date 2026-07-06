@@ -63,6 +63,7 @@ const themes = [
 export default function PrintLetterpad({ children, madrasaInfo, logoUrl, title }: PrintLetterpadProps) {
   const [padEnabled, setPadEnabled] = useState(true);
   const [establishedYear, setEstablishedYear] = useState("২০০২");
+  const [registrationNumber, setRegistrationNumber] = useState("১২৪৫/বি");
   const [selectedQuoteIndex, setSelectedQuoteIndex] = useState(0);
   const [selectedThemeId, setSelectedThemeId] = useState("green");
   const [isPanelExpanded, setIsPanelExpanded] = useState(false);
@@ -74,12 +75,14 @@ export default function PrintLetterpad({ children, madrasaInfo, logoUrl, title }
     if (typeof window !== "undefined") {
       const savedPadEnabled = localStorage.getItem("pad_print_enabled");
       const savedEstYear = localStorage.getItem("pad_print_est_year");
+      const savedRegNum = localStorage.getItem("pad_print_reg_num");
       const savedQuoteIdx = localStorage.getItem("pad_print_quote_idx");
       const savedTheme = localStorage.getItem("pad_print_theme");
       const savedMemo = localStorage.getItem("pad_print_memo");
 
       if (savedPadEnabled !== null) setPadEnabled(savedPadEnabled === "true");
       if (savedEstYear !== null) setEstablishedYear(savedEstYear);
+      if (savedRegNum !== null) setRegistrationNumber(savedRegNum);
       if (savedQuoteIdx !== null) setSelectedQuoteIndex(parseInt(savedQuoteIdx, 10));
       if (savedTheme !== null) setSelectedThemeId(savedTheme);
       if (savedMemo !== null) setMemoNumber(savedMemo);
@@ -106,6 +109,11 @@ export default function PrintLetterpad({ children, madrasaInfo, logoUrl, title }
   const handleEstYearChange = (val: string) => {
     setEstablishedYear(val);
     localStorage.setItem("pad_print_est_year", val);
+  };
+
+  const handleRegNumberChange = (val: string) => {
+    setRegistrationNumber(val);
+    localStorage.setItem("pad_print_reg_num", val);
   };
 
   const handleQuoteChange = (idx: number) => {
@@ -162,7 +170,7 @@ export default function PrintLetterpad({ children, madrasaInfo, logoUrl, title }
 
         {/* Panel Expanded Controls */}
         <div className={`border-t border-slate-100 bg-slate-50/50 p-4 sm:p-6 space-y-6 ${isPanelExpanded ? 'block' : 'hidden'}`}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {/* Toggle Switch */}
             <div className="space-y-2">
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">লেটারপ্যাড ব্যবহার</label>
@@ -188,6 +196,18 @@ export default function PrintLetterpad({ children, madrasaInfo, logoUrl, title }
                 value={establishedYear}
                 onChange={(e) => handleEstYearChange(e.target.value)}
                 placeholder="উদা: ২০০২ বা ২০০৫"
+                className="w-full bg-white px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 transition font-medium text-slate-800"
+              />
+            </div>
+
+            {/* Registration Number */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">নিবন্ধন নম্বর (রেজি নং)</label>
+              <input 
+                type="text" 
+                value={registrationNumber}
+                onChange={(e) => handleRegNumberChange(e.target.value)}
+                placeholder="উদা: ১২৪৫/বি"
                 className="w-full bg-white px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 transition font-medium text-slate-800"
               />
             </div>
@@ -283,7 +303,7 @@ export default function PrintLetterpad({ children, madrasaInfo, logoUrl, title }
                 </div>
                 <div className="text-left leading-tight">
                   <span className={`text-[10px] uppercase font-bold tracking-wider ${currentTheme.lightText}`}>স্থাপিত: {establishedYear} ইং</span>
-                  <div className={`text-[9px] font-bold text-slate-400 mt-0.5`}>রেজি নং: ১২৪৫/বি</div>
+                  <div className={`text-[9px] font-bold text-slate-400 mt-0.5`}>রেজি নং: {registrationNumber}</div>
                 </div>
               </div>
 
