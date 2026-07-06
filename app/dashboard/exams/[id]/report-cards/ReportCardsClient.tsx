@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getStudentReportCard } from "@/app/actions/exams";
 import { FileText, Printer } from "lucide-react";
+import { getMadrasaProfileWithLogo } from "@/app/actions/tenant";
+import PrintLetterpad from "@/app/components/PrintLetterpad";
 
 export default function ReportCardsClient({ 
    examId, 
@@ -20,6 +22,17 @@ export default function ReportCardsClient({
   const [classId, setClassId] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [profileAndLogo, setProfileAndLogo] = useState<any>(null);
+
+  useEffect(() => {
+    async function load() {
+      const res = await getMadrasaProfileWithLogo();
+      if (res) {
+        setProfileAndLogo(res);
+      }
+    }
+    load();
+  }, []);
 
   const loadResults = async () => {
     if (!classId) return;
@@ -80,93 +93,92 @@ export default function ReportCardsClient({
       {/* Print View: One report card per page or 2 per page depending on size */}
       <div className="hidden print:block print:w-full space-y-12">
         {results.map((student, index) => (
-          <div key={student.id} className="print:break-after-page print:w-full print:h-[100vh] print:flex print:flex-col print:justify-center">
-            <div className="border-4 border-double border-slate-800 p-8 m-4 rounded-xl relative bg-white">
-              {/* Header */}
-              <div className="text-center border-b-2 border-slate-800 pb-4 mb-6 relative">
-                <h1 className="text-3xl font-bold text-slate-900">{madrasaInfo?.name || 'Qawmi Madrasa'}</h1>
-                <p className="text-slate-700 font-medium text-lg mt-1">{madrasaInfo?.address || ''}</p>
-                
-                <div className="mt-4 inline-block bg-slate-800 text-white px-6 py-2 rounded-full font-bold text-xl uppercase tracking-wider">
-                  প্রোগ্রেস রিপোর্ট / মার্কশিট
+          <div key={student.id} className="print:break-after-page print:w-full print:min-h-[100vh] print:py-6">
+            <PrintLetterpad madrasaInfo={profileAndLogo?.madrasa || madrasaInfo} logoUrl={profileAndLogo?.logoUrl}>
+              <div className="border-4 border-double border-slate-800 p-8 m-4 rounded-xl relative bg-white">
+                {/* Header */}
+                <div className="text-center border-b-2 border-slate-800 pb-4 mb-6 relative">
+                  <div className="mt-2 inline-block bg-slate-800 text-white px-6 py-2 rounded-full font-bold text-xl uppercase tracking-wider">
+                    প্রোগ্রেস রিপোর্ট / মার্কশিট
+                  </div>
+                  
+                  <p className="text-slate-800 font-bold text-lg mt-4">{examTitle} - {examYear}</p>
                 </div>
-                
-                <p className="text-slate-800 font-bold text-lg mt-4">{examTitle} - {examYear}</p>
-              </div>
 
-              {/* Student Info */}
-              <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-8 text-lg">
-                <div className="flex border-b border-dashed border-slate-400 pb-1">
-                  <span className="font-semibold text-slate-700 w-32">ছাত্রের নাম:</span>
-                  <span className="font-bold text-slate-900 flex-1">{student.first_name} {student.last_name}</span>
+                {/* Student Info */}
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-8 text-lg">
+                  <div className="flex border-b border-dashed border-slate-400 pb-1">
+                    <span className="font-semibold text-slate-700 w-32">ছাত্রের নাম:</span>
+                    <span className="font-bold text-slate-900 flex-1">{student.first_name} {student.last_name}</span>
+                  </div>
+                  <div className="flex border-b border-dashed border-slate-400 pb-1">
+                    <span className="font-semibold text-slate-700 w-32">ক্লাস:</span>
+                    <span className="font-bold text-slate-900 flex-1">{student.class_name}</span>
+                  </div>
+                  <div className="flex border-b border-dashed border-slate-400 pb-1">
+                    <span className="font-semibold text-slate-700 w-32">রোল নম্বর:</span>
+                    <span className="font-bold text-slate-900 flex-1">{student.roll_number || 'N/A'}</span>
+                  </div>
+                  <div className="flex border-b border-dashed border-slate-400 pb-1">
+                    <span className="font-semibold text-slate-700 w-32">মেধাস্থান:</span>
+                    <span className="font-bold text-slate-900 flex-1">{index + 1}</span>
+                  </div>
                 </div>
-                <div className="flex border-b border-dashed border-slate-400 pb-1">
-                  <span className="font-semibold text-slate-700 w-32">ক্লাস:</span>
-                  <span className="font-bold text-slate-900 flex-1">{student.class_name}</span>
-                </div>
-                <div className="flex border-b border-dashed border-slate-400 pb-1">
-                  <span className="font-semibold text-slate-700 w-32">রোল নম্বর:</span>
-                  <span className="font-bold text-slate-900 flex-1">{student.roll_number || 'N/A'}</span>
-                </div>
-                <div className="flex border-b border-dashed border-slate-400 pb-1">
-                  <span className="font-semibold text-slate-700 w-32">মেধাস্থান:</span>
-                  <span className="font-bold text-slate-900 flex-1">{index + 1}</span>
-                </div>
-              </div>
 
-              {/* Marks Table */}
-              <table className="w-full text-left border-collapse mb-8">
-                <thead>
-                  <tr>
-                    <th className="border-2 border-slate-800 px-4 py-3 bg-slate-100 font-bold text-slate-900 text-center w-16">ক্র.নং</th>
-                    <th className="border-2 border-slate-800 px-4 py-3 bg-slate-100 font-bold text-slate-900">বিষয়ের নাম</th>
-                    <th className="border-2 border-slate-800 px-4 py-3 bg-slate-100 font-bold text-slate-900 text-center w-32">পূর্ণ নম্বর</th>
-                    <th className="border-2 border-slate-800 px-4 py-3 bg-slate-100 font-bold text-slate-900 text-center w-32">প্রাপ্ত নম্বর</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {student.marks?.map((markRow: any, i: number) => (
-                    <tr key={i}>
-                      <td className="border-2 border-slate-800 px-4 py-2 text-center text-slate-800 font-medium">{i + 1}</td>
-                      <td className="border-2 border-slate-800 px-4 py-2 font-bold text-slate-900">{markRow.subject_name}</td>
-                      <td className="border-2 border-slate-800 px-4 py-2 text-center text-slate-800 font-medium">{markRow.total_marks}</td>
-                      <td className="border-2 border-slate-800 px-4 py-2 text-center font-bold text-slate-900">{markRow.marks_obtained}</td>
+                {/* Marks Table */}
+                <table className="w-full text-left border-collapse mb-8">
+                  <thead>
+                    <tr>
+                      <th className="border-2 border-slate-800 px-4 py-3 bg-slate-100 font-bold text-slate-900 text-center w-16">ক্র.নং</th>
+                      <th className="border-2 border-slate-800 px-4 py-3 bg-slate-100 font-bold text-slate-900">বিষয়ের নাম</th>
+                      <th className="border-2 border-slate-800 px-4 py-3 bg-slate-100 font-bold text-slate-900 text-center w-32">পূর্ণ নম্বর</th>
+                      <th className="border-2 border-slate-800 px-4 py-3 bg-slate-100 font-bold text-slate-900 text-center w-32">প্রাপ্ত নম্বর</th>
                     </tr>
-                  ))}
-                  {/* Total Row */}
-                  <tr>
-                    <td colSpan={2} className="border-2 border-slate-800 px-4 py-3 text-right font-bold text-slate-900 uppercase">সর্বমোট:</td>
-                    <td className="border-2 border-slate-800 px-4 py-3 text-center font-bold text-slate-900">{student.totalMax}</td>
-                    <td className="border-2 border-slate-800 px-4 py-3 text-center font-bold text-slate-900 text-xl">{student.totalObtained}</td>
-                  </tr>
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {student.marks?.map((markRow: any, i: number) => (
+                      <tr key={i}>
+                        <td className="border-2 border-slate-800 px-4 py-2 text-center text-slate-800 font-medium">{i + 1}</td>
+                        <td className="border-2 border-slate-800 px-4 py-2 font-bold text-slate-900">{markRow.subject_name}</td>
+                        <td className="border-2 border-slate-800 px-4 py-2 text-center text-slate-800 font-medium">{markRow.total_marks}</td>
+                        <td className="border-2 border-slate-800 px-4 py-2 text-center font-bold text-slate-900">{markRow.marks_obtained}</td>
+                      </tr>
+                    ))}
+                    {/* Total Row */}
+                    <tr>
+                      <td colSpan={2} className="border-2 border-slate-800 px-4 py-3 text-right font-bold text-slate-900 uppercase">সর্বমোট:</td>
+                      <td className="border-2 border-slate-800 px-4 py-3 text-center font-bold text-slate-900">{student.totalMax}</td>
+                      <td className="border-2 border-slate-800 px-4 py-3 text-center font-bold text-slate-900 text-xl">{student.totalObtained}</td>
+                    </tr>
+                  </tbody>
+                </table>
 
-              {/* Final Grade / Result */}
-              <div className="flex justify-between items-center bg-slate-50 border-2 border-slate-800 p-4 rounded-lg mb-16">
-                <div className="text-xl">
-                  <span className="font-semibold text-slate-700">প্রাপ্ত বিভাগ (Grade): </span>
-                  <span className="font-bold text-slate-900 text-2xl">{student.grade}</span>
+                {/* Final Grade / Result */}
+                <div className="flex justify-between items-center bg-slate-50 border-2 border-slate-800 p-4 rounded-lg mb-16">
+                  <div className="text-xl">
+                    <span className="font-semibold text-slate-700">প্রাপ্ত বিভাগ (Grade): </span>
+                    <span className="font-bold text-slate-900 text-2xl">{student.grade}</span>
+                  </div>
+                  <div className="text-xl">
+                    <span className="font-semibold text-slate-700">শতকরা (Percentage): </span>
+                    <span className="font-bold text-slate-900 text-2xl">{student.percentage}%</span>
+                  </div>
                 </div>
-                <div className="text-xl">
-                  <span className="font-semibold text-slate-700">শতকরা (Percentage): </span>
-                  <span className="font-bold text-slate-900 text-2xl">{student.percentage}%</span>
+
+                {/* Signatures */}
+                <div className="flex justify-between items-end mt-12 pt-8">
+                  <div className="text-center w-48 border-t-2 border-slate-800 pt-2">
+                    <p className="font-bold text-slate-900">শ্রেণী শিক্ষকের স্বাক্ষর</p>
+                  </div>
+                  <div className="text-center w-48 border-t-2 border-slate-800 pt-2">
+                    <p className="font-bold text-slate-900">পরীক্ষা নিয়ন্ত্রক</p>
+                  </div>
+                  <div className="text-center w-48 border-t-2 border-slate-800 pt-2">
+                    <p className="font-bold text-slate-900">মুহতামিম / প্রিন্সিপাল</p>
+                  </div>
                 </div>
               </div>
-
-              {/* Signatures */}
-              <div className="flex justify-between items-end mt-12 pt-8">
-                <div className="text-center w-48 border-t-2 border-slate-800 pt-2">
-                  <p className="font-bold text-slate-900">শ্রেণী শিক্ষকের স্বাক্ষর</p>
-                </div>
-                <div className="text-center w-48 border-t-2 border-slate-800 pt-2">
-                  <p className="font-bold text-slate-900">পরীক্ষা নিয়ন্ত্রক</p>
-                </div>
-                <div className="text-center w-48 border-t-2 border-slate-800 pt-2">
-                  <p className="font-bold text-slate-900">মুহতামিম / প্রিন্সিপাল</p>
-                </div>
-              </div>
-            </div>
+            </PrintLetterpad>
           </div>
         ))}
       </div>
